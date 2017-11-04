@@ -4,11 +4,20 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from django_mail_admin.models import EmailTemplate
+from jsonfield import JSONField
 
 logger = logging.getLogger(__name__)
 
+PRIORITY = namedtuple('PRIORITY', 'low medium high now')._make(range(4))
+STATUS = namedtuple('STATUS', 'sent failed queued')._make(range(3))
+
 
 class OutgoingEmail(models.Model):
+    PRIORITY_CHOICES = [(PRIORITY.low, _("low")), (PRIORITY.medium, _("medium")),
+                        (PRIORITY.high, _("high")), (PRIORITY.now, _("now"))]
+    STATUS_CHOICES = [(STATUS.sent, _("sent")), (STATUS.failed, _("failed")),
+                      (STATUS.queued, _("queued"))]
+
     class Meta:
         verbose_name = _("Email letter")
         verbose_name_plural = _("Email letters")
@@ -16,12 +25,12 @@ class OutgoingEmail(models.Model):
     from_email = models.CharField(
         verbose_name=_("From email"),
         max_length=254,
-        default=default_from_email
+        validators=[validate_email_with_name]
     )
 
-    to = CommaSeparatedEmailField(
-        verbose_name=_("To email(s)"),
-    )
+    to = CommaSeparatedEmailField(_("To email(s)"))
+    cc = CommaSeparatedEmailField(_("Cc"))
+    bcc = CommaSeparatedEmailField(_("Bcc"))
 
     template = models.ForeignKey(
         EmailTemplate,
@@ -34,33 +43,38 @@ class OutgoingEmail(models.Model):
 
     subject = models.CharField(
         verbose_name=_("Subject"),
-        max_length=254,
+        max_length=989,
         blank=True
     )
+    message = models.TextField(_("Message"), blank=True)
 
-    html_message = RichTextField(
+    html_message = models.TextField(
         verbose_name=_("HTML Message"),
         blank=True,
         help_text=_("Used only if template is not selected")
     )
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+    last_updated = models.DateTimeField(db_index=True, auto_now=True)
+    scheduled_time = models.DateTimeField(_('The scheduled sending time'),
+                                          blank=True, null=True, db_index=True)
+    headers = JSONField(_('Headers'), blank=True, null=True)
 
-    scheduled_time = models.DateTimeField(
-        verbose_name=_('The scheduled sending time'),
-        null=True,
-        blank=True
-    )
+    status = models.PositiveSmallIntegerField(
+        _("Status"),
+        choices=STATUS_CHOICES, db_index=True,
+        blank=True, null=True)
+    priority = models.PositiveSmallIntegerField(_("Priority"),
+                                                choices=PRIORITY_CHOICES,
+                                                blank=True, null=True)
 
     send_now = models.BooleanField(
         verbose_name=_("Send now"),
         default=False
     )
 
-    post_office_email = models.OneToOneField(
-        post_office_models.Email,
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE
-    )
+    context = context_field_class(_('Context'), blank=True, null=True)
+    backend_alias = models.CharField(_('Backend alias'), blank=True, default='',
+                                     max_length=64)
 
     @property
     def status(self):
