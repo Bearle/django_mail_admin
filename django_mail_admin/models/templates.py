@@ -23,8 +23,8 @@ class EmailTemplate(models.Model):
         blank=True
     )
 
-    email_topic = models.CharField(
-        verbose_name=_("Email topic"),
+    subject = models.CharField(
+        verbose_name=_("Subject"),
         max_length=254,
         blank=False
     )

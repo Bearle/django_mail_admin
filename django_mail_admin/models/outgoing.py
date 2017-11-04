@@ -11,7 +11,8 @@ logger = logging.getLogger(__name__)
 PRIORITY = namedtuple('PRIORITY', 'low medium high now')._make(range(4))
 STATUS = namedtuple('STATUS', 'sent failed queued')._make(range(3))
 
-#TODO: implement mailings
+
+# TODO: implement mailings
 class OutgoingEmail(models.Model):
     PRIORITY_CHOICES = [(PRIORITY.low, _("low")), (PRIORITY.medium, _("medium")),
                         (PRIORITY.high, _("high")), (PRIORITY.now, _("now"))]

@@ -28,6 +28,7 @@ class CustomEmailBackend(EmailBackend):
         self.ssl_keyfile = configuration.email_ssl_keyfile if ssl_keyfile is None else ssl_keyfile
         self.ssl_certfile = configuration.email_ssl_certfile if ssl_certfile is None else ssl_certfile
         if self.use_ssl and self.use_tls:
+            # TODO: validate in model's save method instead
             raise ValueError(
                 "EMAIL_USE_TLS/EMAIL_USE_SSL are mutually exclusive, so only set "
                 "one of those settings to True.")
