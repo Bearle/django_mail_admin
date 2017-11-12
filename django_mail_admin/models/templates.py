@@ -1,7 +1,6 @@
 import logging
 from django.db import models
 from django.template import Template, Context
-from django_mail_admin.models import OutgoingEmail
 from django.utils.translation import ugettext_lazy as _
 
 logger = logging.getLogger(__name__)
@@ -34,7 +33,7 @@ class EmailTemplate(models.Model):
         blank=True
     )
 
-    email_html_text = RichTextField(
+    email_html_text = models.TextField(
         verbose_name=_("Email html text"),
         blank=True
     )
@@ -63,7 +62,7 @@ class TemplateVariable(models.Model):
         verbose_name_plural = _("Template variables")
 
     email = models.ForeignKey(
-        OutgoingEmail,
+        'OutgoingEmail',
         null=True,
         blank=True,
         on_delete=models.CASCADE

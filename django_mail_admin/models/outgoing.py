@@ -1,10 +1,17 @@
 import logging
 from django.db import models
-from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
-from django_mail_admin.models import EmailTemplate
+from .templates import EmailTemplate
 from jsonfield import JSONField
+from collections import namedtuple
+from django_mail_admin.validators import validate_email_with_name
+from django_mail_admin.fields import CommaSeparatedEmailField
+from django_mail_admin.settings import context_field_class
+
+from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django_mail_admin.utils import get_attachment_save_path
+import post_office
 
 logger = logging.getLogger(__name__)
 
@@ -77,14 +84,61 @@ class OutgoingEmail(models.Model):
     backend_alias = models.CharField(_('Backend alias'), blank=True, default='',
                                      max_length=64)
 
+    def __init__(self, *args, **kwargs):
+        super(OutgoingEmail, self).__init__(*args, **kwargs)
+        self._cached_email_message = None
+
+    def email_message(self):
+        """
+        Returns Django EmailMessage object for sending.
+        """
+        if self._cached_email_message:
+            return self._cached_email_message
+
+        return self.prepare_email_message()
+
+    def prepare_email_message(self):
+        """
+        Returns a django ``EmailMessage`` or ``EmailMultiAlternatives`` object,
+        depending on whether html_message is empty.
+        """
+        subject = self.subject
+
+        if self.template is not None:
+            _context = Context(self.context)
+            subject = Template(self.template.subject).render(_context)
+            message = Template(self.template.content).render(_context)
+            html_message = Template(self.template.html_content).render(_context)
+
+        else:
+            subject = self.subject
+            message = self.message
+            html_message = self.html_message
+
+        connection = connections[self.backend_alias or 'default']
+
+        if html_message:
+            msg = EmailMultiAlternatives(
+                subject=subject, body=message, from_email=self.from_email,
+                to=self.to, bcc=self.bcc, cc=self.cc,
+                headers=self.headers, connection=connection)
+            msg.attach_alternative(html_message, "text/html")
+        else:
+            msg = EmailMessage(
+                subject=subject, body=message, from_email=self.from_email,
+                to=self.to, bcc=self.bcc, cc=self.cc,
+                headers=self.headers, connection=connection)
+
+        for attachment in self.attachments.all():
+            msg.attach(attachment.name, attachment.file.read(), mimetype=attachment.mimetype or None)
+            attachment.file.close()
+
+        self._cached_email_message = msg
+        return msg
+
     @property
     def status(self):
-        try:
-            return self.post_office_email.get_status_display()
-        except:
-            return "-"
-
-    status.fget.short_description = _("Status")
+        return self.get_status_display()
 
     def _get_context(self):
         context = {}
@@ -148,9 +202,20 @@ class OutgoingEmail(models.Model):
         return f"{self.from_email} -> {self.to} ({self.subject})"
 
 
-@receiver(signal=post_delete, sender=OutgoingEmail)
-def delete_related(sender, instance, **kwargs):
-    try:
-        instance.post_office_email.delete()
-    except:
-        logger.warning(f"Related PostOffice object for {instance} not found.")
+class Attachment(models.Model):
+    """
+    A model describing an email attachment.
+    """
+    file = models.FileField(_('File'), upload_to=get_attachment_save_path)
+    name = models.CharField(_('Name'), max_length=255, help_text=_("The original filename"))
+    emails = models.ManyToManyField(OutgoingEmail, related_name='attachments',
+                                    verbose_name=_('Email addresses'))
+    mimetype = models.CharField(max_length=255, default='', blank=True)
+
+    class Meta:
+        app_label = 'post_office'
+        verbose_name = _("Attachment")
+        verbose_name_plural = _("Attachments")
+
+    def __str__(self):
+        return self.name
