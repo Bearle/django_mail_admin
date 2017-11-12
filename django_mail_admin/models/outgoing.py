@@ -7,7 +7,7 @@ from jsonfield import JSONField
 from collections import namedtuple
 from django_mail_admin.validators import validate_email_with_name
 from django_mail_admin.fields import CommaSeparatedEmailField
-from django_mail_admin.settings import context_field_class
+from django_mail_admin.settings import context_field_class, get_log_level
 
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django_mail_admin.utils import get_attachment_save_path
@@ -88,6 +88,13 @@ class OutgoingEmail(models.Model):
         super(OutgoingEmail, self).__init__(*args, **kwargs)
         self._cached_email_message = None
 
+    def _get_context(self):
+        context = {}
+        for var in self.templatevariable_set.all().filter(email=self):
+            context[var.name] = var.value
+
+        return Context(context)
+
     def email_message(self):
         """
         Returns Django EmailMessage object for sending.
@@ -102,17 +109,13 @@ class OutgoingEmail(models.Model):
         Returns a django ``EmailMessage`` or ``EmailMultiAlternatives`` object,
         depending on whether html_message is empty.
         """
-        subject = self.subject
-
+        message = self.message
         if self.template is not None:
-            _context = Context(self.context)
+            _context = Context(self._get_context())
             subject = Template(self.template.subject).render(_context)
-            message = Template(self.template.content).render(_context)
-            html_message = Template(self.template.html_content).render(_context)
-
+            html_message = self.template.render_html_text(_context)
         else:
             subject = self.subject
-            message = self.message
             html_message = self.html_message
 
         connection = connections[self.backend_alias or 'default']
@@ -136,55 +139,51 @@ class OutgoingEmail(models.Model):
         self._cached_email_message = msg
         return msg
 
-    @property
-    def status(self):
-        return self.get_status_display()
-
-    def _get_context(self):
-        context = {}
-        for var in self.templatevariable_set.all().filter(email=self):
-            context[var.name] = var.value
-
-        return Context(context)
-
     def queue(self):
-        if self.post_office_email:
-            self.post_office_email.status = post_office_models.STATUS.queued
-            self.post_office_email.save()
+        self.status = STATUS.queued
+        self.save()
 
-    def perform_email(self, send=True):
+    def dispatch(self, log_level=None,
+                 disconnect_after_delivery=True, commit=True):
+        """
+        Sends email and log the result.
+        """
         # TODO: ensure that priority from admin saving is used correctly
-        self.html_message = self.template.email_html_text_preview(self._get_context()) \
-            if self.template else self.html_message
-        self.subject = self.template.email_topic if self.template else self.subject
-        headers = {'From': f'"{default_from_name()}" <{self.from_email}>'}
-        if self.post_office_email:
-            self.post_office_email.from_email = self.from_email
-            self.post_office_email.headers = headers
-            self.post_office_email.to = self.to
-            self.post_office_email.subject = self.subject
-            self.post_office_email.html_message = self.html_message
-            self.post_office_email.scheduled_time = self.scheduled_time
-            self.post_office_email.priority = post_office_models.PRIORITY.now if self.send_now \
-                else post_office_models.PRIORITY.high
-            # Set the status to queued again to re-send the email
-            if send:
-                self.queue()
-            self.post_office_email.save()
-        else:
-            po_email = post_office_models.Email(
-                from_email=self.from_email,
-                headers=headers,
-                to=self.to,
-                subject=self.subject,
-                html_message=self.html_message,
-                scheduled_time=self.scheduled_time,
-                priority=post_office_models.PRIORITY.now if self.send_now else post_office_models.PRIORITY.high
-            )
-            if send:
-                self.queue()
-            po_email.save()
-            self.post_office_email = po_email
+        # headers = {'From': f'"{default_from_name()}" <{self.from_email}>'}
+        # TODO: deal with default headers
+        # TODO: handle send_now correctly
+        # priority=post_office_models.PRIORITY.now if self.send_now else post_office_models.PRIORITY.high
+        try:
+            self.email_message().send()
+            status = STATUS.sent
+            message = ''
+            exception_type = ''
+        except Exception as e:
+            status = STATUS.failed
+            message = str(e)
+            exception_type = type(e).__name__
+
+            # If run in a bulk sending mode, reraise and let the outer
+            # layer handle the exception
+            if not commit:
+                raise
+
+        if commit:
+            self.status = status
+            self.save(update_fields=['status'])
+
+            if log_level is None:
+                log_level = get_log_level()
+
+            # If log level is 0, log nothing, 1 logs only sending failures
+            # and 2 means log both successes and failures
+            if log_level == 1:
+                if status == STATUS.failed:
+                    self.logs.create(status=status, message=message,
+                                     exception_type=exception_type)
+            elif log_level == 2:
+                self.logs.create(status=status, message=message,
+                                 exception_type=exception_type)
 
     def save(self, **kwargs):
         if 'send' in kwargs:

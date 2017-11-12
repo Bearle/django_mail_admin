@@ -38,14 +38,7 @@ class EmailTemplate(models.Model):
         blank=True
     )
 
-    def email_text_preview(self, context):
-        try:
-            template = Template(self.email_text)
-            return template.render(context)
-        except Exception:
-            return _("Error template rendering")
-
-    def email_html_text_preview(self, context):
+    def render_html_text(self, context):
         try:
             template = Template(self.email_html_text)
             return template.render(context)
