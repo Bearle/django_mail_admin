@@ -20,8 +20,8 @@ logger = setup_loghandlers("INFO")
 
 
 def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
-           html_message='', context=None, scheduled_time=None, headers=None,
-           template=None, priority=None, render_on_delivery=False, commit=True,
+           html_message='', scheduled_time=None, headers=None,
+           template=None, priority=None, commit=True,
            backend=''):
     """
     Creates an email from supplied keyword arguments. If template is
@@ -36,46 +36,21 @@ def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
         cc = []
     if bcc is None:
         bcc = []
-    if context is None:
-        context = ''
+    if template:
+        subject = template.subject
 
-    # If email is to be rendered during delivery, save all necessary
-    # information
-    if render_on_delivery:
-        email = OutgoingEmail(
-            from_email=sender,
-            to=recipients,
-            cc=cc,
-            bcc=bcc,
-            scheduled_time=scheduled_time,
-            headers=headers, priority=priority, status=status,
-            context=context, template=template, backend_alias=backend
-        )
-
-    else:
-
-        if template:
-            subject = template.subject
-            message = template.content
-            html_message = template.html_content
-
-        _context = Context(context or {})
-        subject = Template(subject).render(_context)
-        message = Template(message).render(_context)
-        html_message = Template(html_message).render(_context)
-
-        email = OutgoingEmail(
-            from_email=sender,
-            to=recipients,
-            cc=cc,
-            bcc=bcc,
-            subject=subject,
-            message=message,
-            html_message=html_message,
-            scheduled_time=scheduled_time,
-            headers=headers, priority=priority, status=status,
-            backend_alias=backend
-        )
+    email = OutgoingEmail(
+        from_email=sender,
+        to=recipients,
+        cc=cc,
+        bcc=bcc,
+        subject=subject,
+        message=message,
+        html_message=html_message,
+        scheduled_time=scheduled_time,
+        headers=headers, priority=priority, status=status,
+        backend_alias=backend
+    )
 
     if commit:
         email.save()
@@ -83,11 +58,10 @@ def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
     return email
 
 
-def send(recipients=None, sender=None, template=None, context=None, subject='',
+def send(sender, recipients=None, template=None, subject='',
          message='', html_message='', scheduled_time=None, headers=None,
-         priority=None, attachments=None, render_on_delivery=False,
-         log_level=None, commit=True, cc=None, bcc=None, language='',
-         backend=''):
+         priority=None, attachments=None,
+         log_level=None, commit=True, cc=None, bcc=None, backend=''):
     try:
         recipients = parse_emails(recipients)
     except ValidationError as e:
@@ -102,9 +76,6 @@ def send(recipients=None, sender=None, template=None, context=None, subject='',
         bcc = parse_emails(bcc)
     except ValidationError as e:
         raise ValidationError('bcc: %s' % e.message)
-
-    if sender is None:
-        sender = settings.DEFAULT_FROM_EMAIL
 
     priority = parse_priority(priority)
 
@@ -125,24 +96,12 @@ def send(recipients=None, sender=None, template=None, context=None, subject='',
         if html_message:
             raise ValueError('You can\'t specify both "template" and "html_message" arguments')
 
-        # TODO: deal with language
-
-        # template can be an EmailTemplate instance or name
-        if isinstance(template, EmailTemplate):
-            template = template
-            # If language is specified, ensure template uses the right language
-            if language:
-                if template.language != language:
-                    template = template.translated_templates.get(language=language)
-        else:
-            template = get_email_template(template, language)
-
     if backend and backend not in get_available_backends().keys():
         raise ValueError('%s is not a valid backend alias' % backend)
 
-    email = create(sender, recipients, cc, bcc, subject, message, html_message,
-                   context, scheduled_time, headers, template, priority,
-                   render_on_delivery, commit=commit, backend=backend)
+    email = create(sender, recipients, cc, bcc,
+                   subject, message, html_message, scheduled_time, headers, template,
+                   priority, commit=commit, backend=backend)
 
     if attachments:
         attachments = create_attachments(attachments)

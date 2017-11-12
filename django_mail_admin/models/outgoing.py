@@ -4,19 +4,17 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from .templates import EmailTemplate
 from jsonfield import JSONField
-from collections import namedtuple
 from django_mail_admin.validators import validate_email_with_name
 from django_mail_admin.fields import CommaSeparatedEmailField
 from django_mail_admin.settings import context_field_class, get_log_level
 
 from django.core.mail import EmailMessage, EmailMultiAlternatives
-from django_mail_admin.utils import get_attachment_save_path
+from django_mail_admin.utils import get_attachment_save_path, PRIORITY, STATUS
 import post_office
 
 logger = logging.getLogger(__name__)
 
-PRIORITY = namedtuple('PRIORITY', 'low medium high now')._make(range(4))
-STATUS = namedtuple('STATUS', 'sent failed queued')._make(range(3))
+
 
 
 # TODO: implement mailings
@@ -111,7 +109,7 @@ class OutgoingEmail(models.Model):
         """
         message = self.message
         if self.template is not None:
-            _context = Context(self._get_context())
+            _context = self._get_context()
             subject = Template(self.template.subject).render(_context)
             html_message = self.template.render_html_text(_context)
         else:
@@ -185,14 +183,8 @@ class OutgoingEmail(models.Model):
                 self.logs.create(status=status, message=message,
                                  exception_type=exception_type)
 
-    def save(self, **kwargs):
-        if 'send' in kwargs:
-            send = kwargs.pop('send')
-            super(OutgoingEmail, self).save(**kwargs)
-            self.perform_email(send=send)
-        else:
-            super(OutgoingEmail, self).save(**kwargs)
-            self.perform_email(send=False)
+    def save(self, *args, **kwargs):
+        super(OutgoingEmail, self).save(*args, **kwargs)
 
     def update_related(self):
         self.save(send=True)

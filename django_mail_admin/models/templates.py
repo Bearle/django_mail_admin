@@ -2,10 +2,11 @@ import logging
 from django.db import models
 from django.template import Template, Context
 from django.utils.translation import ugettext_lazy as _
+from django_mail_admin.validators import validate_template_syntax
 
 logger = logging.getLogger(__name__)
 
-
+#TODO: is email_text used?
 class EmailTemplate(models.Model):
     # TODO: add description about vars availiable
     class Meta:
@@ -25,7 +26,8 @@ class EmailTemplate(models.Model):
     subject = models.CharField(
         verbose_name=_("Subject"),
         max_length=254,
-        blank=False
+        blank=False,
+        validators=[validate_template_syntax]
     )
 
     email_text = models.TextField(
@@ -35,15 +37,13 @@ class EmailTemplate(models.Model):
 
     email_html_text = models.TextField(
         verbose_name=_("Email html text"),
-        blank=True
+        blank=True,
+        validators=[validate_template_syntax]
     )
 
     def render_html_text(self, context):
-        try:
-            template = Template(self.email_html_text)
-            return template.render(context)
-        except Exception:
-            return _("Error template rendering")
+        template = Template(self.email_html_text)
+        return template.render(context)
 
     def __str__(self):
         return self.name

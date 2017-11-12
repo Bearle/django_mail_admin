@@ -2,10 +2,15 @@ import datetime
 import email.header
 import logging
 import os
-
+from collections import namedtuple
+from django_mail_admin.settings import get_default_priority
 from django.conf import settings
+from .validators import validate_email_with_name
 
 logger = logging.getLogger(__name__)
+
+PRIORITY = namedtuple('PRIORITY', 'low medium high now')._make(range(4))
+STATUS = namedtuple('STATUS', 'sent failed queued')._make(range(3))
 
 
 def get_settings():
@@ -136,9 +141,9 @@ def get_body_from_message(message, maintype, subtype):
 
 
 def get_attachment_save_path(instance, filename):
-    settings = get_settings()
+    _settings = get_settings()
 
-    path = settings['attachment_upload_to']
+    path = _settings['attachment_upload_to']
     if '%' in path:
         path = datetime.datetime.utcnow().strftime(path)
 
@@ -146,3 +151,38 @@ def get_attachment_save_path(instance, filename):
         path,
         filename,
     )
+
+
+def parse_priority(priority):
+    if priority is None:
+        priority = get_default_priority()
+    # If priority is given as a string, returns the enum representation
+    if isinstance(priority, string_types):
+        priority = getattr(PRIORITY, priority, None)
+
+        if priority is None:
+            raise ValueError('Invalid priority, must be one of: %s' %
+                             ', '.join(PRIORITY._fields))
+    return priority
+
+
+def parse_emails(emails):
+    """
+    A function that returns a list of valid email addresses.
+    This function will also convert a single email address into
+    a list of email addresses.
+    None value is also converted into an empty list.
+    """
+
+    if isinstance(emails, str):
+        emails = [emails]
+    elif emails is None:
+        emails = []
+
+    for i in emails:
+        try:
+            validate_email_with_name(i)
+        except ValidationError:
+            raise ValidationError('%s is not a valid email address' % i)
+
+    return emails
