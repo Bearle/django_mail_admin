@@ -20,6 +20,7 @@ from django.core.mail.message import make_msgid
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from django.utils.timezone import now
+from django.core.exceptions import ValidationError
 
 from django_mail_admin import utils
 from django_mail_admin.signals import message_received
@@ -56,6 +57,12 @@ class EmailConfiguration(models.Model):
             qs.update(active=False)
 
         super(EmailConfiguration, self).save(*args, **kwargs)
+
+    def clean(self):
+        if self.use_ssl and self.use_tls:
+            raise ValidationError(
+                "EMAIL_USE_TLS/EMAIL_USE_SSL are mutually exclusive, so only set "
+                "one of those settings to True.")
 
     def __str__(self):
         return '%(email_host_user)s@%(email_host)s:%(email_port)s' % {'email_host_user': self.email_host_user,
