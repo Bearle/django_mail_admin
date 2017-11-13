@@ -10,7 +10,7 @@ from django_mail_admin.settings import context_field_class, get_log_level
 from django.core.files import File
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django_mail_admin.utils import get_attachment_save_path, PRIORITY, STATUS
-import post_office
+from django_mail_admin.signals import email_sent, email_failed_to_send
 
 logger = logging.getLogger(__name__)
 
@@ -148,17 +148,19 @@ class OutgoingEmail(models.Model):
         # headers = {'From': f'"{default_from_name()}" <{self.from_email}>'}
         # TODO: deal with default headers
 
+        email_message = self.email_message()
         # Priority is handled in mail.send
         try:
-            self.email_message().send()
+            email_message.send()
             status = STATUS.sent
             message = ''
             exception_type = ''
+            email_sent.send(sender=self, outgoing_email=email_message)
         except Exception as e:
             status = STATUS.failed
             message = str(e)
             exception_type = type(e).__name__
-
+            email_failed_to_send.send(sender=self, outgoing_email=email_message)
             # If run in a bulk sending mode, reraise and let the outer
             # layer handle the exception
             if not commit:
