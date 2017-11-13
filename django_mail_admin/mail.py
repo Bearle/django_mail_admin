@@ -12,7 +12,7 @@ from .connections import connections
 from .models import OutgoingEmail, EmailTemplate, Log, PRIORITY, STATUS, create_attachments
 from .settings import (get_available_backends, get_batch_size,
                        get_log_level, get_sending_order, get_threads_per_process)
-from .utils import (get_email_template, parse_emails, parse_priority,
+from .utils import (parse_emails, parse_priority,
                     split_emails)
 from .logutils import setup_loghandlers
 

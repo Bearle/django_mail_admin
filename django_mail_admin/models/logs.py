@@ -19,7 +19,6 @@ class Log(models.Model):
     message = models.TextField(_('Message'))
 
     class Meta:
-        app_label = 'post_office'
         verbose_name = _("Log")
         verbose_name_plural = _("Logs")
 

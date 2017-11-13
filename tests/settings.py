@@ -2,7 +2,7 @@
 from __future__ import unicode_literals, absolute_import
 
 import django
-
+import os
 DEBUG = True
 USE_TZ = True
 
@@ -12,7 +12,30 @@ SECRET_KEY = "vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": ":memory:",
+        'NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
+        'TEST_NAME': os.path.join(os.path.dirname(__file__), 'test.db'),
+    }
+}
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'TIMEOUT': 36000,
+        'KEY_PREFIX': 'django_mail_admin',
+    },
+    'django_mail_admin': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'TIMEOUT': 36000,
+        'KEY_PREFIX': 'django_mail_admin',
+    }
+}
+
+DJANGO_MAIL_ADMIN = {
+    'BACKENDS': {
+        'default': 'django.core.mail.backends.dummy.EmailBackend',
+        'locmem': 'django.core.mail.backends.locmem.EmailBackend',
+        'error': 'tests.test_backends.ErrorRaisingBackend',
+        'smtp': 'django.core.mail.backends.smtp.EmailBackend',
+        'connection_tester': 'django_mail_admin.tests.test_mail.ConnectionTestingBackend',
     }
 }
 

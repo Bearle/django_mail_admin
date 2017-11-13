@@ -139,8 +139,7 @@ class OutgoingEmail(models.Model):
         self.status = STATUS.queued
         self.save()
 
-    def dispatch(self, log_level=None,
-                 disconnect_after_delivery=True, commit=True):
+    def dispatch(self, log_level=None, commit=True):
         """
         Sends email and log the result.
         """
@@ -204,7 +203,6 @@ class Attachment(models.Model):
     mimetype = models.CharField(max_length=255, default='', blank=True)
 
     class Meta:
-        app_label = 'post_office'
         verbose_name = _("Attachment")
         verbose_name_plural = _("Attachments")
 
@@ -250,3 +248,27 @@ def create_attachments(attachment_files):
             opened_file.close()
 
     return attachments
+
+
+def send_mail(subject, message, from_email, recipient_list, html_message='',
+              scheduled_time=None, headers=None, priority=PRIORITY.medium):
+    """
+    Add a new message to the mail queue. This is a replacement for Django's
+    ``send_mail`` core email method.
+    """
+
+    subject = force_text(subject)
+    status = None if priority == PRIORITY.now else STATUS.queued
+    emails = []
+    for address in recipient_list:
+        emails.append(
+            OutgoingEmail.objects.create(
+                from_email=from_email, to=address, subject=subject,
+                message=message, html_message=html_message, status=status,
+                headers=headers, priority=priority, scheduled_time=scheduled_time
+            )
+        )
+    if priority == PRIORITY.now:
+        for email in emails:
+            email.dispatch()
+    return emails

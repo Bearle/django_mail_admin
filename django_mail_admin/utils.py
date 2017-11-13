@@ -6,6 +6,7 @@ from collections import namedtuple
 from django_mail_admin.settings import get_default_priority
 from django.conf import settings
 from .validators import validate_email_with_name
+from django.utils.encoding import force_text
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,7 @@ PRIORITY = namedtuple('PRIORITY', 'low medium high now')._make(range(4))
 STATUS = namedtuple('STATUS', 'sent failed queued')._make(range(3))
 
 
+# TODO: merge post_office and these settings into 1
 def get_settings():
     return {
         'strip_unallowed_mimetypes': getattr(
