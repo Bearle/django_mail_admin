@@ -186,3 +186,11 @@ def parse_emails(emails):
             raise ValidationError('%s is not a valid email address' % i)
 
     return emails
+
+
+def split_emails(emails, split_count=1):
+    # Group emails into X sublists
+    # taken from http://www.garyrobinson.net/2008/04/splitting-a-pyt.html
+    # Strange bug, only return 100 email if we do not evaluate the list
+    if list(emails):
+        return [emails[i::split_count] for i in range(split_count)]

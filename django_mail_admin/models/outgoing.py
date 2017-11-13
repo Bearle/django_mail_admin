@@ -7,14 +7,12 @@ from jsonfield import JSONField
 from django_mail_admin.validators import validate_email_with_name
 from django_mail_admin.fields import CommaSeparatedEmailField
 from django_mail_admin.settings import context_field_class, get_log_level
-
+from django.core.files import File
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django_mail_admin.utils import get_attachment_save_path, PRIORITY, STATUS
 import post_office
 
 logger = logging.getLogger(__name__)
-
-
 
 
 # TODO: implement mailings
@@ -146,11 +144,11 @@ class OutgoingEmail(models.Model):
         """
         Sends email and log the result.
         """
-        # TODO: ensure that priority from admin saving is used correctly
+
         # headers = {'From': f'"{default_from_name()}" <{self.from_email}>'}
         # TODO: deal with default headers
-        # TODO: handle send_now correctly
-        # priority=post_office_models.PRIORITY.now if self.send_now else post_office_models.PRIORITY.high
+
+        # Priority is handled in mail.send
         try:
             self.email_message().send()
             status = STATUS.sent
@@ -210,3 +208,43 @@ class Attachment(models.Model):
 
     def __str__(self):
         return self.name
+
+
+def create_attachments(attachment_files):
+    """
+    Create Attachment instances from files
+
+    attachment_files is a dict of:
+        * Key - the filename to be used for the attachment.
+        * Value - file-like object, or a filename to open OR a dict of {'file': file-like-object, 'mimetype': string}
+
+    Returns a list of Attachment objects
+    """
+    attachments = []
+    for filename, filedata in attachment_files.items():
+
+        if isinstance(filedata, dict):
+            content = filedata.get('file', None)
+            mimetype = filedata.get('mimetype', None)
+        else:
+            content = filedata
+            mimetype = None
+
+        opened_file = None
+
+        if isinstance(content, str):
+            # `content` is a filename - try to open the file
+            opened_file = open(content, 'rb')
+            content = File(opened_file)
+
+        attachment = Attachment()
+        if mimetype:
+            attachment.mimetype = mimetype
+        attachment.file.save(filename, content=content, save=True)
+
+        attachments.append(attachment)
+
+        if opened_file is not None:
+            opened_file.close()
+
+    return attachments

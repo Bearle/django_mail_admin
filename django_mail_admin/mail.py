@@ -9,11 +9,11 @@ from django.template import Context, Template
 from django.utils.timezone import now
 
 from .connections import connections
-from .models import OutgoingEmail, EmailTemplate, Log, PRIORITY, STATUS
+from .models import OutgoingEmail, EmailTemplate, Log, PRIORITY, STATUS, create_attachments
 from .settings import (get_available_backends, get_batch_size,
                        get_log_level, get_sending_order, get_threads_per_process)
 from .utils import (get_email_template, parse_emails, parse_priority,
-                    split_emails, create_attachments)
+                    split_emails)
 from .logutils import setup_loghandlers
 
 logger = setup_loghandlers("INFO")
@@ -62,6 +62,14 @@ def send(sender, recipients=None, template=None, subject='',
          message='', html_message='', scheduled_time=None, headers=None,
          priority=None, attachments=None,
          log_level=None, commit=True, cc=None, bcc=None, backend=''):
+    """
+    Validates input, parses emails
+    Creates an email with appropriate status and queues it if needed
+    Adds attachments if they are passed
+    Dispatches the email if it has PRIORITY.now or leaves for send_queued
+    If the email is dispatched, it is rendered with a template and then sent through django Email model
+    Then the result is logged into Log model
+    """
     try:
         recipients = parse_emails(recipients)
     except ValidationError as e:
