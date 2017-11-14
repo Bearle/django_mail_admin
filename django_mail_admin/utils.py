@@ -7,6 +7,7 @@ from django_mail_admin.settings import get_default_priority
 from django.conf import settings
 from .validators import validate_email_with_name
 from django.utils.encoding import force_text
+from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -144,7 +145,8 @@ def get_body_from_message(message, maintype, subtype):
 
 def get_attachment_save_path(instance, filename):
     _settings = get_settings()
-
+    if not instance.name:
+        instance.name = filename  # set original filename
     path = _settings['attachment_upload_to']
     if '%' in path:
         path = datetime.datetime.utcnow().strftime(path)
@@ -159,7 +161,7 @@ def parse_priority(priority):
     if priority is None:
         priority = get_default_priority()
     # If priority is given as a string, returns the enum representation
-    if isinstance(priority, string_types):
+    if isinstance(priority, str):
         priority = getattr(PRIORITY, priority, None)
 
         if priority is None:

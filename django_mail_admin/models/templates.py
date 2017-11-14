@@ -6,7 +6,9 @@ from django_mail_admin.validators import validate_template_syntax
 
 logger = logging.getLogger(__name__)
 
-#TODO: is email_text used?
+
+# TODO: implement cache usage as in post_office
+# TODO: is email_text used?
 class EmailTemplate(models.Model):
     # TODO: add description about vars availiable
     class Meta:

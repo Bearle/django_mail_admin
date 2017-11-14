@@ -2,6 +2,7 @@ import logging
 from django.db import models
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_text
 from .templates import EmailTemplate
 from jsonfield import JSONField
 from django_mail_admin.validators import validate_email_with_name
@@ -11,7 +12,7 @@ from django.core.files import File
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django_mail_admin.utils import get_attachment_save_path, PRIORITY, STATUS
 from django_mail_admin.signals import email_sent, email_failed_to_send
-
+from django_mail_admin.connections import connections
 logger = logging.getLogger(__name__)
 
 
@@ -183,6 +184,7 @@ class OutgoingEmail(models.Model):
                                  exception_type=exception_type)
 
     def save(self, *args, **kwargs):
+        self.full_clean()
         super(OutgoingEmail, self).save(*args, **kwargs)
 
     def update_related(self):
