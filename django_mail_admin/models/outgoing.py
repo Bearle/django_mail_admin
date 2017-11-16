@@ -13,6 +13,7 @@ from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django_mail_admin.utils import get_attachment_save_path, PRIORITY, STATUS
 from django_mail_admin.signals import email_sent, email_failed_to_send
 from django_mail_admin.connections import connections
+from django.template import Template, Context
 logger = logging.getLogger(__name__)
 
 

@@ -205,8 +205,7 @@ def _send_bulk(emails, uses_multiprocessing=True, log_level=None):
 
     def send(email):
         try:
-            email.dispatch(log_level=log_level, commit=False,
-                           disconnect_after_delivery=False)
+            email.dispatch(log_level=log_level, commit=False)
             sent_emails.append(email)
             logger.debug('Successfully sent email #%d' % email.id)
         except Exception as e:
