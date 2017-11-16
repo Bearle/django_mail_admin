@@ -14,6 +14,7 @@ from django_mail_admin.utils import get_attachment_save_path, PRIORITY, STATUS
 from django_mail_admin.signals import email_sent, email_failed_to_send
 from django_mail_admin.connections import connections
 from django.template import Template, Context
+
 logger = logging.getLogger(__name__)
 
 
@@ -187,9 +188,6 @@ class OutgoingEmail(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super(OutgoingEmail, self).save(*args, **kwargs)
-
-    def update_related(self):
-        self.save(send=True)
 
     def __str__(self):
         return f"{self.from_email} -> {self.to} ({self.subject})"

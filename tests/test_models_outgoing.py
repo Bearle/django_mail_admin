@@ -43,6 +43,13 @@ class OutgoingModelTest(TestCase):
         self.assertEqual(message.subject, 'Subject')
         self.assertEqual(message.body, 'Message')
 
+    def test_email_message_queue(self):
+        email = OutgoingEmail.objects.create(to=['to@example.com'],
+                                             from_email='from@example.com', subject='Subject',
+                                             message='Message', html_message='<p>HTML</p>')
+        email.queue()
+        self.assertEqual(OutgoingEmail.objects.filter(status=STATUS.queued).count(), 1)
+
     def test_email_message_render(self):
         """
         Ensure Email instance with template is properly rendered.
@@ -301,3 +308,8 @@ class OutgoingModelTest(TestCase):
                          '<EmailTemplate: test>')
         self.assertEqual(repr(OutgoingEmail(from_email='from@example.com', to=['test@example.com'])),
                          "<Email: ['test@example.com']>")
+
+    def test_models_str(self):
+        self.assertEqual(str(Attachment(name='test')), 'test')
+        self.assertEqual(str(EmailTemplate(name='test')),
+                         'test')
