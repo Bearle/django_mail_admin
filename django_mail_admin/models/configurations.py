@@ -31,7 +31,7 @@ from django_mail_admin.transports import Pop3Transport, ImapTransport, \
 logger = logging.getLogger(__name__)
 
 
-class EmailConfiguration(models.Model):
+class Outbox(models.Model):
     name = models.CharField('Name', max_length=255)
     email_use_tls = models.BooleanField('EMAIL_USE_TLS', default=True)
     email_use_ssl = models.BooleanField('EMAIL_USE_SSL', default=False)
@@ -56,7 +56,7 @@ class EmailConfiguration(models.Model):
             # and deactive them
             qs.update(active=False)
 
-        super(EmailConfiguration, self).save(*args, **kwargs)
+        super(Outbox, self).save(*args, **kwargs)
 
     def clean(self):
         if self.use_ssl and self.use_tls:
@@ -70,8 +70,8 @@ class EmailConfiguration(models.Model):
                                                                       'email_port': self.email_port}
 
     class Meta:
-        verbose_name = _("Outgoing email configuration")
-        verbose_name_plural = _("Outgoing email configurations")
+        verbose_name = _("Outbox")
+        verbose_name_plural = _("Outboxes")
 
 
 class ActiveMailboxManager(models.Manager):

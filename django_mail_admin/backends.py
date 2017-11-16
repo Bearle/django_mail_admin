@@ -1,7 +1,7 @@
 from django.core.files.base import ContentFile
 from django.core.mail.backends.smtp import EmailBackend
 from django.conf import settings
-from .models import EmailConfiguration
+from .models import Outbox
 import threading
 
 
@@ -13,7 +13,7 @@ class CustomEmailBackend(EmailBackend):
                  **kwargs):
         super(CustomEmailBackend, self).__init__(fail_silently=fail_silently)
         # TODO: implement choosing backend for a letter as a param
-        configurations = EmailConfiguration.objects.filter(active=True)
+        configurations = Outbox.objects.filter(active=True)
         if len(configurations) > 1 or len(configurations) == 0:
             raise ValueError('Got %(l)s active configurations, expected 1' % {'l': len(configurations)})
         else:
