@@ -9,6 +9,7 @@ from django_mail_admin.transports import ImapTransport, Pop3Transport
 def b(s):
     return s.encode("latin-1")
 
+
 FAKE_UID_SEARCH_ANSWER = (
     'OK',
     [
@@ -155,9 +156,8 @@ class TestPop3Transport(EmailMessageTestCase):
                 '+OK message follows',
                 [
                     line.encode('ascii')
-                    for line in self._get_email_as_text(
-                    'generic_message.eml'
-                ).decode('ascii').split('\n')
+                    for line in self._get_email_as_text('generic_message.eml')
+                    .decode('ascii').split('\n')
                 ],
                 10018,  # Some arbitrary size, ideally matching the above
             ]

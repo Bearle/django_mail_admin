@@ -281,6 +281,7 @@ class Mailbox(models.Model):
         return msg
 
     def _get_dehydrated_message(self, msg, record):
+        from django_mail_admin.models import IncomingAttachment
         settings = utils.get_settings()
 
         new = EmailMessage()
@@ -323,7 +324,7 @@ class Mailbox(models.Model):
             if not extension:
                 extension = '.bin'
 
-            attachment = MessageAttachment()
+            attachment = IncomingAttachment()
 
             attachment.document.save(
                 uuid.uuid4().hex + extension,
@@ -378,7 +379,8 @@ class Mailbox(models.Model):
         return new
 
     def _process_message(self, message):
-        msg = Message()
+        from django_mail_admin.models import IncomingEmail
+        msg = IncomingEmail()
         settings = utils.get_settings()
 
         if settings['store_original_message']:
@@ -410,7 +412,7 @@ class Mailbox(models.Model):
         msg.set_body(body)
         if message['in-reply-to']:
             try:
-                msg.in_reply_to = Message.objects.filter(
+                msg.in_reply_to = IncomingEmail.objects.filter(
                     message_id=message['in-reply-to'].strip()
                 )[0]
             except IndexError:
