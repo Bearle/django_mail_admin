@@ -48,3 +48,5 @@ docs/_build
 venv/
 mailbox_attachments/
 tests/test.db
+messages/
+!/tests/messages/
