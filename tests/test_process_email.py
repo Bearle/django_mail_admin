@@ -5,7 +5,7 @@ import sys
 import copy
 import mock
 
-from django_mail_admin.models import Mailbox, IncomingEmail
+from django_mail_admin.models import Mailbox, IncomingEmail, PRIORITY
 from django_mail_admin.utils import convert_header_to_unicode
 from django_mail_admin import utils
 from .test_mailbox_base import EmailMessageTestCase
@@ -326,37 +326,22 @@ class TestProcessEmail(EmailMessageTestCase):
         self.assertEqual(expected_from, actual_from)
 
     def test_message_reply(self):
-        email_object = EmailMessage(
-            'Test subject',  # subject
-            'Test body',  # body
-            'username@example.com',  # from
-            ['mr.test32@mail.ru'],  # to
-        )
-        msg = self.mailbox.record_outgoing_message(email_object.message())
+        message = self._get_email_object('generic_message.eml')
+        mailbox = Mailbox.objects.create()
+        msg = mailbox.process_incoming_message(message)
+        email = dict(recipients=['to1@example.com', 'to2@example.com'],
+                     cc=['cc1@example.com', 'cc2@example.com'],
+                     bcc=['bcc1@example.com', 'bcc2@example.com'],
+                     subject='foo', message='bar', html_message='baz',
+                     priority=PRIORITY.low)
+        replied = msg.reply(**email)
+        self.assertEqual(replied.headers['In-Reply-To'], msg.message_id)
+        self.assertEqual(replied.from_email, msg.to_addresses[0])
 
-        self.assertTrue(msg.outgoing)
-
-        actual_from = 'username@example.com'
-        reply_email_object = EmailMessage(
-            'Test subject',  # subject
-            'Test body',  # body
-            actual_from,  # from
-            ['mr.test32@mail.ru'],  # to
-        )
-
-        with mock.patch.object(reply_email_object, 'send'):
-            reply_msg = msg.reply(reply_email_object)
-
-        self.assertEqual(reply_msg.in_reply_to, msg)
-
-        self.assertEqual(actual_from, msg.from_header)
-
-        reply_email_object.from_email = None
-
-        with mock.patch.object(reply_email_object, 'send'):
-            second_reply_msg = msg.reply(reply_email_object)
-
-        self.assertEqual(self.mailbox.from_email, second_reply_msg.from_header)
+        # create an email as if it was send as a reply re-using our reply msg
+        replied_email_obj = replied.email_message().message()
+        second_msg = mailbox.process_incoming_message(replied_email_obj)
+        self.assertEqual(second_msg.in_reply_to, replied)
 
     def test_message_with_text_attachment(self):
         email_object = self._get_email_object(

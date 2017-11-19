@@ -8,7 +8,7 @@ To use django mail admin in a project, add it to your `INSTALLED_APPS`:
 
     INSTALLED_APPS = (
         ...
-        'django_mail_admin.apps.DjangoMailAdminConfig',
+        'django_mail_admin',
         ...
     )
 

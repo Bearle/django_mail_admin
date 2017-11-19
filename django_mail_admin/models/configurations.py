@@ -264,20 +264,10 @@ class Mailbox(models.Model):
         msg = self._process_message(message)
         if msg is None:
             return None
-        msg.outgoing = False
         msg.save()
 
         message_received.send(sender=self, message=msg)
 
-        return msg
-
-    def record_outgoing_message(self, message):
-        """Record an outgoing message associated with this mailbox."""
-        msg = self._process_message(message)
-        if msg is None:
-            return None
-        msg.outgoing = True
-        msg.save()
         return msg
 
     def _get_dehydrated_message(self, msg, record):
@@ -379,7 +369,7 @@ class Mailbox(models.Model):
         return new
 
     def _process_message(self, message):
-        from django_mail_admin.models import IncomingEmail
+        from django_mail_admin.models import IncomingEmail, OutgoingEmail
         msg = IncomingEmail()
         settings = utils.get_settings()
 
@@ -412,8 +402,10 @@ class Mailbox(models.Model):
         msg.set_body(body)
         if message['in-reply-to']:
             try:
-                msg.in_reply_to = IncomingEmail.objects.filter(
-                    message_id=message['in-reply-to'].strip()
+                in_reply_to = message['in-reply-to'].strip()
+                # Hack to work with db-independent JSONField (which is interpreted as string in db)
+                msg.in_reply_to = OutgoingEmail.objects.filter(
+                    headers__contains='"In-Reply-To":"'+message['in-reply-to'].strip()+'"'
                 )[0]
             except IndexError:
                 pass

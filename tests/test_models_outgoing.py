@@ -173,7 +173,7 @@ class OutgoingModelTest(TestCase):
                      cc=['cc1@example.com', 'cc2@example.com'],
                      bcc=['bcc1@example.com', 'bcc2@example.com'],
                      subject='foo', message='bar', html_message='baz',
-                     context={'name': 'Alice'}, headers=headers,
+                     headers=headers,
                      scheduled_time=scheduled_time, priority=PRIORITY.low)
 
         self.assertEqual(email.to, ['to1@example.com', 'to2@example.com'])
@@ -189,8 +189,7 @@ class OutgoingModelTest(TestCase):
         # Same thing, but now with context
         email = send(['to1@example.com'], 'from@a.com',
                      subject='Hi {{ name }}', message='Message {{ name }}',
-                     html_message='<b>{{ name }}</b>',
-                     context={'name': 'Bob'}, headers=headers)
+                     html_message='<b>{{ name }}</b>', headers=headers)
         self.assertEqual(email.to, ['to1@example.com'])
         self.assertEqual(email.subject, 'Hi Bob')
         self.assertEqual(email.message, 'Message Bob')

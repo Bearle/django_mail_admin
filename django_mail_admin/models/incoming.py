@@ -12,6 +12,8 @@ import base64
 import email
 import logging
 from django_mail_admin.models import Mailbox, OutgoingEmail
+from django.core.mail.message import make_msgid
+
 
 class UnreadMessageManager(models.Manager):
     def get_queryset(self):
@@ -130,8 +132,8 @@ class IncomingEmail(models.Model):
                 )
         return addresses
 
-    # TODO: substitute with custom implementation
-    def reply(self, message):
+    # TODO: remember to add some kind of a reply select to outgoin email admin
+    def reply(self, **kwargs):
         """Sends a message as a reply to this message instance.
 
         Although Django's e-mail processing will set both IncomingEmail-ID
@@ -140,20 +142,18 @@ class IncomingEmail(models.Model):
         pre-set it.
 
         """
-        if not message.from_email:
-            if self.mailbox.from_email:
-                message.from_email = self.mailbox.from_email
+        from django_mail_admin.mail import send
+        if 'sender' not in kwargs:
+            if len(self.from_address) == 0 and not self.mailbox.from_email:
+                raise ValidationError('No sender address to reply from, %s' % str(self))
             else:
-                message.from_email = django_settings.DEFAULT_FROM_EMAIL
-        message.extra_headers['Message-ID'] = make_msgid()
-        message.extra_headers['Date'] = formatdate()
-        message.extra_headers['In-Reply-To'] = self.message_id.strip()
-        message.send()
-        return self.mailbox.record_outgoing_message(
-            email.message_from_string(
-                message.message().as_string()
-            )
-        )
+                kwargs['sender'] = self.from_address[0] or self.mailbox.from_email
+        headers = kwargs.get('headers') or {}
+        headers['Message-ID'] = make_msgid()
+        headers['Date'] = formatdate()
+        headers['In-Reply-To'] = self.message_id.strip()
+        kwargs['headers'] = headers
+        return send(**kwargs)
 
     @property
     def text(self):
