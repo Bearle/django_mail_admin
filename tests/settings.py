@@ -3,6 +3,7 @@ from __future__ import unicode_literals, absolute_import
 
 import django
 import os
+
 DEBUG = True
 USE_TZ = True
 
@@ -39,6 +40,7 @@ DJANGO_MAIL_ADMIN = {
         'error': 'tests.test_backends.ErrorRaisingBackend',
         'smtp': 'django.core.mail.backends.smtp.EmailBackend',
         'connection_tester': 'django_mail_admin.tests.test_mail.ConnectionTestingBackend',
+        'custom': 'django_mail_admin.backends.CustomEmailBackend'
     }
 }
 

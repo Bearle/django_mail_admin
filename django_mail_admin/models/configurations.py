@@ -59,7 +59,7 @@ class Outbox(models.Model):
         super(Outbox, self).save(*args, **kwargs)
 
     def clean(self):
-        if self.use_ssl and self.use_tls:
+        if self.email_use_ssl and self.email_use_tls:
             raise ValidationError(
                 _("EMAIL_USE_TLS/EMAIL_USE_SSL are mutually exclusive, so only set one of those settings to True."))
 
@@ -438,7 +438,7 @@ class Mailbox(models.Model):
             return new_mail
         for message in connection.get_message(condition):
             msg = self.process_incoming_message(message)
-            if not msg is None:
+            if msg is not None:
                 new_mail.append(msg)
         self.last_polling = now()
         self.save(update_fields=['last_polling'])

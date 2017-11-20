@@ -13,7 +13,8 @@ import email
 import logging
 from django_mail_admin.models import Mailbox, OutgoingEmail
 from django.core.mail.message import make_msgid
-
+from quopri import encode as encode_quopri
+from django.core.exceptions import ValidationError
 
 class UnreadMessageManager(models.Manager):
     def get_queryset(self):
