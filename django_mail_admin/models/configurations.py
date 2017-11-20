@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class Outbox(models.Model):
-    name = models.CharField('Name', max_length=255)
+    name = models.CharField(_('Name'), max_length=255)
     email_use_tls = models.BooleanField('EMAIL_USE_TLS', default=True)
     email_use_ssl = models.BooleanField('EMAIL_USE_SSL', default=False)
     email_ssl_keyfile = models.CharField('EMAIL_SSL_KEYFILE', max_length=1024, null=True, blank=True)
@@ -42,7 +42,7 @@ class Outbox(models.Model):
     email_host_password = models.CharField('EMAIL_HOST_PASSWORD', max_length=255)
     email_port = models.PositiveSmallIntegerField('EMAIL_PORT', default=587)
     email_timeout = models.PositiveSmallIntegerField('EMAIL_TIMEOUT', null=True, blank=True)
-    active = models.BooleanField(default=False)
+    active = models.BooleanField(_('Active'), default=False)
 
     def save(self, *args, **kwargs):
         # Only one item can be active at a time
@@ -61,8 +61,7 @@ class Outbox(models.Model):
     def clean(self):
         if self.use_ssl and self.use_tls:
             raise ValidationError(
-                "EMAIL_USE_TLS/EMAIL_USE_SSL are mutually exclusive, so only set "
-                "one of those settings to True.")
+                _("EMAIL_USE_TLS/EMAIL_USE_SSL are mutually exclusive, so only set one of those settings to True."))
 
     def __str__(self):
         return '%(email_host_user)s@%(email_host)s:%(email_port)s' % {'email_host_user': self.email_host_user,
@@ -405,7 +404,7 @@ class Mailbox(models.Model):
                 in_reply_to = message['in-reply-to'].strip()
                 # Hack to work with db-independent JSONField (which is interpreted as string in db)
                 msg.in_reply_to = OutgoingEmail.objects.filter(
-                    headers__contains='"In-Reply-To":"'+message['in-reply-to'].strip()+'"'
+                    headers__contains='"In-Reply-To":"' + message['in-reply-to'].strip() + '"'
                 )[0]
             except IndexError:
                 pass

@@ -29,8 +29,8 @@ class CommaSeparatedEmailField(TextField):
         We need to accomodate queries where a single email,
         or list of email addresses is supplied as arguments. For example:
 
-        - Email.objects.filter(to='mail@example.com')
-        - Email.objects.filter(to=['one@example.com', 'two@example.com'])
+        - OutgoingEmail.objects.filter(to='mail@example.com')
+        - OutgoingEmail.objects.filter(to=['one@example.com', 'two@example.com'])
         """
         if isinstance(value, str):
             return value
