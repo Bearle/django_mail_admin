@@ -302,12 +302,6 @@ class OutgoingModelTest(TestCase):
         id_template = template.translated_templates.create(language='id')
         self.assertEqual(id_template.name, template.name)
 
-    def test_models_repr(self):
-        self.assertEqual(repr(EmailTemplate(name='test')),
-                         '<EmailTemplate: test>')
-        self.assertEqual(repr(OutgoingEmail(from_email='from@example.com', to=['test@example.com'])),
-                         "<Email: ['test@example.com']>")
-
     def test_models_str(self):
         self.assertEqual(str(Attachment(name='test')), 'test')
         self.assertEqual(str(EmailTemplate(name='test')),
