@@ -7,6 +7,7 @@ from django.shortcuts import reverse
 from django_mail_admin.utils import convert_header_to_unicode
 from django.utils.safestring import mark_safe
 from django_mail_admin.signals import message_received
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 from django.utils.translation import ugettext_lazy as _
@@ -80,6 +81,16 @@ resend_message_received_signal.short_description = (
 )
 
 
+def custom_titled_filter(title):
+    class Wrapper(admin.FieldListFilter):
+        def __new__(cls, *args, **kwargs):
+            instance = admin.FieldListFilter.create(*args, **kwargs)
+            instance.title = title
+            return instance
+
+    return Wrapper
+
+
 # TODO: deal with read/unread
 class IncomingEmailAdmin(admin.ModelAdmin):
     def html(self, msg):
@@ -134,7 +145,7 @@ class IncomingEmailAdmin(admin.ModelAdmin):
     )
     ordering = ['-processed']
     list_filter = (
-        'mailbox__name',
+        ('mailbox__name', custom_titled_filter(_('Mailbox name'))),
         'processed',
         'read',
     )
@@ -155,6 +166,16 @@ class IncomingEmailAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        obj = IncomingEmail.objects.filter(id=object_id).first()
+        if obj:
+            if not obj.read:
+                obj.read = timezone.now()
+                obj.save()
+        return super(IncomingEmailAdmin, self).change_view(
+            request, object_id, form_url, extra_context=extra_context,
+        )
 
 
 if admin_row_actions:
