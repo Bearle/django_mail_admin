@@ -28,6 +28,7 @@ class IncomingEmail(models.Model):
         Mailbox,
         related_name='messages',
         verbose_name=_(u'Mailbox'),
+        on_delete=models.CASCADE
     )
 
     subject = models.CharField(
@@ -46,6 +47,7 @@ class IncomingEmail(models.Model):
         blank=True,
         null=True,
         verbose_name=_(u'In reply to'),
+        on_delete=models.CASCADE
     )
 
     from_header = models.CharField(
