@@ -199,7 +199,7 @@ class Attachment(models.Model):
     file = models.FileField(_('File'), upload_to=get_attachment_save_path)
     name = models.CharField(_('Name'), max_length=255, help_text=_("The original filename"))
     emails = models.ManyToManyField(OutgoingEmail, related_name='attachments',
-                                    verbose_name=_('Email addresses'), on_delete=models.CASCADE)
+                                    verbose_name=_('Email addresses'))
     mimetype = models.CharField(max_length=255, default='', blank=True)
 
     class Meta:
