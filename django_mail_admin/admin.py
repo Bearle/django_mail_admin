@@ -102,7 +102,7 @@ class IncomingEmailAdmin(admin.ModelAdmin):
     def from_address(self, msg):
         f = msg.from_address
         if len(f) > 0:
-            return f[0]
+            return ','.join(f)
         else:
             return ''
 
