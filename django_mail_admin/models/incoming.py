@@ -296,8 +296,8 @@ class IncomingEmail(models.Model):
         return self.subject
 
     class Meta:
-        verbose_name = _('E-mail message')
-        verbose_name_plural = _('E-mail messages')
+        verbose_name = _('Incoming e-mail')
+        verbose_name_plural = _('Incoming e-mails')
 
 
 class IncomingAttachment(models.Model):

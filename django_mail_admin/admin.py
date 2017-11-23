@@ -99,6 +99,15 @@ class IncomingEmailAdmin(admin.ModelAdmin):
 
     mailbox_link.short_description = _('Mailbox')
 
+    def from_address(self, msg):
+        f = msg.from_address
+        if len(f) > 0:
+            return f[0]
+        else:
+            return ''
+
+    from_address.short_description = _('From')
+
     def envelope_headers(self, msg):
         email = msg.get_email_object()
         return '\n'.join(
@@ -117,6 +126,7 @@ class IncomingEmailAdmin(admin.ModelAdmin):
 
     list_display = (
         'subject',
+        'from_address',
         'processed',
         'read',
         'mailbox_link',
@@ -140,6 +150,7 @@ class IncomingEmailAdmin(admin.ModelAdmin):
         'text',
         'html',
     )
+    search_fields = ['mailbox__name', 'subject', 'from_header', 'in_reply_to__subject']
     actions = [resend_message_received_signal]
 
     def has_add_permission(self, request):
