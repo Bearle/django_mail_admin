@@ -283,7 +283,6 @@ class OutgoingEmailAdmin(admin.ModelAdmin):
     formfield_overrides = {
         CommaSeparatedEmailField: {'widget': CommaSeparatedEmailWidget}
     }
-    filter_horizontal = ['attachments']
     actions = [requeue]
 
     def to_display(self, instance):
