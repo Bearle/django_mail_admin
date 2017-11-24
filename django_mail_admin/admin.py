@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from django.contrib import admin
 from django_mail_admin.models import Mailbox, IncomingAttachment, IncomingEmail, TemplateVariable, OutgoingEmail, \
-    Outbox, EmailTemplate, STATUS, Log
+    Outbox, EmailTemplate, STATUS, Log, Attachment
 from django.shortcuts import reverse
 from django_mail_admin.utils import convert_header_to_unicode
 from django.utils.safestring import mark_safe
@@ -246,9 +246,11 @@ def get_message_preview(instance):
 get_message_preview.short_description = _('Message')
 
 
-class LogInline(admin.StackedInline):
-    model = Log
-    extra = 0
+class AttachmentInline(admin.TabularInline):
+    model = Attachment.emails.through
+    extra = 1
+    verbose_name = _("Attachment")
+    verbose_name_plural = _("Attachments")
 
 
 class CommaSeparatedEmailWidget(TextInput):
@@ -276,11 +278,12 @@ requeue.short_description = _('Requeue selected emails')
 # TODO:use attachments, probable inline
 
 class OutgoingEmailAdmin(admin.ModelAdmin):
-    inlines = (TemplateVariableInline, LogInline)
+    inlines = (TemplateVariableInline, AttachmentInline)
     list_display = ['id', 'to_display', 'subject', 'template', 'from_email', 'status', 'scheduled_time', 'priority']
     formfield_overrides = {
         CommaSeparatedEmailField: {'widget': CommaSeparatedEmailWidget}
     }
+    filter_horizontal = ['attachments']
     actions = [requeue]
 
     def to_display(self, instance):
@@ -302,4 +305,6 @@ if getattr(settings, 'DJANGO_MAILADMIN_ADMIN_ENABLED', True):
     admin.site.register(IncomingAttachment, IncomingAttachmentAdmin)
     admin.site.register(Mailbox, MailboxAdmin)
     admin.site.register(EmailTemplate, EmailTemplateAdmin)
+    # Without this attachment inline won't have add/edit buttons
+    admin.site.register(Attachment)
     admin.site.register(OutgoingEmail, OutgoingEmailAdmin)
