@@ -26,8 +26,8 @@ class OutgoingEmail(models.Model):
                       (STATUS.queued, _("queued"))]
 
     class Meta:
-        verbose_name = _("Email letter")
-        verbose_name_plural = _("Email letters")
+        verbose_name = _("Outgoing email")
+        verbose_name_plural = _("Outgoing emails")
 
     from_email = models.CharField(
         verbose_name=_("From email"),
