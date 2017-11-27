@@ -240,7 +240,7 @@ class TemplateVariableInline(admin.TabularInline):
 
 
 def get_message_preview(instance):
-    return (u'{0}...'.format(instance.message[:25]) if len(instance.message) > 25
+    return ('{0}...'.format(instance.message[:25]) if len(instance.message) > 25
             else instance.message)
 
 

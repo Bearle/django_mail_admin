@@ -5,6 +5,7 @@ import requests
 
 from social_django.models import UserSocialAuth
 
+# FIXME: Warning - this code was taken from django_mailbox and haven't been touched yet as of 27.11.2017
 
 logger = logging.getLogger(__name__)
 

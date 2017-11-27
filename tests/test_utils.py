@@ -79,7 +79,7 @@ class UtilsTest(TestCase):
         self.assertTrue(attachments[0].pk)
         self.assertEqual(attachments[0].file.read(), b'content')
         self.assertTrue(attachments[0].name.startswith('attachment_file'))
-        self.assertEquals(attachments[0].mimetype, u'')
+        self.assertEquals(attachments[0].mimetype, '')
 
     def test_create_attachments_with_mimetype(self):
         attachments = create_attachments({

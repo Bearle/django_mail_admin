@@ -27,17 +27,17 @@ class IncomingEmail(models.Model):
     mailbox = models.ForeignKey(
         Mailbox,
         related_name='messages',
-        verbose_name=_(u'Mailbox'),
+        verbose_name=_('Mailbox'),
         on_delete=models.CASCADE
     )
 
     subject = models.CharField(
-        _(u'Subject'),
+        _('Subject'),
         max_length=255
     )
 
     message_id = models.CharField(
-        _(u'IncomingEmail ID'),
+        _('IncomingEmail ID'),
         max_length=255
     )
 
@@ -46,7 +46,7 @@ class IncomingEmail(models.Model):
         related_name='replies',
         blank=True,
         null=True,
-        verbose_name=_(u'In reply to'),
+        verbose_name=_('In reply to'),
         on_delete=models.CASCADE
     )
 
@@ -56,15 +56,15 @@ class IncomingEmail(models.Model):
     )
 
     to_header = models.TextField(
-        _(u'To header'),
+        _('To header'),
     )
 
     body = models.TextField(
-        _(u'Body'),
+        _('Body'),
     )
 
     encoded = models.BooleanField(
-        _(u'Encoded'),
+        _('Encoded'),
         default=False,
         help_text=_('True if the e-mail body is Base64 encoded'),
     )
@@ -75,17 +75,17 @@ class IncomingEmail(models.Model):
     )
 
     read = models.DateTimeField(
-        _(u'Read'),
+        _('Read'),
         default=None,
         blank=True,
         null=True,
     )
 
     eml = models.FileField(
-        _(u'Raw message contents'),
+        _('Raw message contents'),
         null=True,
         upload_to="messages",
-        help_text=_(u'Original full content of message')
+        help_text=_('Original full content of message')
     )
     objects = models.Manager()
     unread_messages = UnreadMessageManager()
@@ -312,13 +312,13 @@ class IncomingAttachment(models.Model):
     )
 
     headers = models.TextField(
-        _(u'Headers'),
+        _('Headers'),
         null=True,
         blank=True,
     )
 
     document = models.FileField(
-        _(u'Document'),
+        _('Document'),
         upload_to=get_attachment_save_path,
     )
 

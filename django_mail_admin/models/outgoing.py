@@ -44,7 +44,8 @@ class OutgoingEmail(models.Model):
         verbose_name=_("Template"),
         null=True,
         blank=True,
-        help_text=_("If template is selected, HTML message will not be used"),
+        help_text=_("If template is selected, HTML message and "
+                    "subject fields will not be used - they will be populated from template"),
         on_delete=models.CASCADE
     )
 
