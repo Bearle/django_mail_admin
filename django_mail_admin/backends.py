@@ -1,6 +1,4 @@
-from django.core.files.base import ContentFile
 from django.core.mail.backends.smtp import EmailBackend
-from django.conf import settings
 from .models import Outbox
 import threading
 

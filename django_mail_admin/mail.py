@@ -1,15 +1,13 @@
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import connection as db_connection
 from django.db.models import Q
-from django.template import Context, Template
 from django.utils.timezone import now
 
 from .connections import connections
-from .models import OutgoingEmail, EmailTemplate, Log, PRIORITY, STATUS, create_attachments, TemplateVariable
+from .models import OutgoingEmail, Log, PRIORITY, STATUS, create_attachments, TemplateVariable
 from .settings import (get_available_backends, get_batch_size,
                        get_log_level, get_sending_order, get_threads_per_process)
 from .utils import (parse_emails, parse_priority,
