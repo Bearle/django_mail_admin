@@ -7,7 +7,7 @@ from django.core.files.base import ContentFile
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.forms.models import modelform_factory
 from django.test import TestCase
-
+from django.test.utils import override_settings
 from django_mail_admin.models import OutgoingEmail, Log, PRIORITY, STATUS, EmailTemplate, Attachment, TemplateVariable
 from django_mail_admin.mail import send
 
@@ -84,6 +84,21 @@ class OutgoingModelTest(TestCase):
         email.dispatch()
         log = Log.objects.latest('id')
         self.assertEqual(email.status, STATUS.sent)
+        self.assertEqual(log.email, email)
+
+    @override_settings(DJANGO_MAIL_ADMIN={'LOG_LEVEL': 1})
+    def test_log_levels(self):
+        # Logs with LOG_LEVEL=1 should only be created when email failed to send
+        email = OutgoingEmail.objects.create(to=['to@example.com'], from_email='from@example.com',
+                                             subject='Test', message='Message', backend_alias='locmem', id=333)
+        email.dispatch()
+        log = list(Log.objects.all())
+        self.assertEqual(log, [])
+        email = OutgoingEmail.objects.create(to=['to@example.com'], from_email='from@example.com',
+                                             subject='Test', message='Message',
+                                             backend_alias='error')
+        email.dispatch()
+        log = Log.objects.latest('id')
         self.assertEqual(log.email, email)
 
     def test_status_and_log_on_error(self):

@@ -31,3 +31,20 @@ class TestMailbox(TestCase):
         self.assertEqual(mailbox.last_polling, None)
         mailbox.get_new_mail()
         self.assertNotEqual(mailbox.last_polling, None)
+
+    def test_active_manager(self):
+        mailbox_active = Mailbox.objects.create(uri="mbox://" + os.path.join(
+            os.path.dirname(__file__),
+            'messages',
+            'generic_message.eml',
+        ), active=True)
+
+        mailbox_inactive = Mailbox.objects.create(uri="mbox://" + os.path.join(
+            os.path.dirname(__file__),
+            'messages',
+            'generic_message.eml',
+        ), active=False)
+
+        q = Mailbox.active_mailboxes.all()
+        self.assertIn(mailbox_active, q)
+        self.assertNotIn(mailbox_inactive, q)
