@@ -143,6 +143,7 @@ def get_body_from_message(message, maintype, subtype):
     return body
 
 
+# TODO: deal with saving - links in admin seem to be broken
 def get_attachment_save_path(instance, filename):
     _settings = get_settings()
     if hasattr(instance, 'name'):

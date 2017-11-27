@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.cache.backends.base import InvalidCacheBackendError
 from django.core.cache import caches
 from django.utils.module_loading import import_string
+from django.utils.translation import ugettext_lazy as _
+
 
 def get_cache(name):
     return caches[name]
@@ -48,6 +50,10 @@ def get_available_backends():
         backends['default'] = 'django.core.mail.backends.smtp.EmailBackend'
 
     return backends
+
+
+def get_backend_names_str():
+    return _('Available backends are: ') + str(list(get_available_backends().keys()))
 
 
 def get_cache_backend():

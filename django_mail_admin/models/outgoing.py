@@ -7,7 +7,7 @@ from .templates import EmailTemplate
 from jsonfield import JSONField
 from django_mail_admin.validators import validate_email_with_name
 from django_mail_admin.fields import CommaSeparatedEmailField
-from django_mail_admin.settings import get_log_level
+from django_mail_admin.settings import get_log_level, get_backend_names_str
 from django.core.files import File
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django_mail_admin.utils import get_attachment_save_path, PRIORITY, STATUS
@@ -80,6 +80,7 @@ class OutgoingEmail(models.Model):
     )
 
     backend_alias = models.CharField(_('Backend alias'), blank=True, default='',
+                                     help_text=get_backend_names_str,
                                      max_length=64)
 
     def __init__(self, *args, **kwargs):
@@ -200,7 +201,7 @@ class Attachment(models.Model):
     """
     file = models.FileField(_('File'), upload_to=get_attachment_save_path)
     name = models.CharField(_('Name'), max_length=255, help_text=_("The original filename"))
-    emails = models.ManyToManyField(OutgoingEmail, related_name='attachments',
+    emails = models.ManyToManyField(OutgoingEmail, related_name='attachments', blank=True,
                                     verbose_name=_('Email addresses'))
     mimetype = models.CharField(max_length=255, default='', blank=True)
 

@@ -8,7 +8,6 @@ logger = logging.getLogger(__name__)
 
 
 # TODO: implement cache usage as in post_office
-# TODO: is email_text used?
 class EmailTemplate(models.Model):
     # TODO: add description about vars availiable
     class Meta:
@@ -30,11 +29,6 @@ class EmailTemplate(models.Model):
         max_length=254,
         blank=False,
         validators=[validate_template_syntax]
-    )
-
-    email_text = models.TextField(
-        verbose_name=_("Email text"),
-        blank=True
     )
 
     email_html_text = models.TextField(

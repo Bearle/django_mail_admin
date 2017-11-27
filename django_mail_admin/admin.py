@@ -2,6 +2,7 @@ import logging
 
 from django.conf import settings
 from django.contrib import admin
+
 from django_mail_admin.models import Mailbox, IncomingAttachment, IncomingEmail, TemplateVariable, OutgoingEmail, \
     Outbox, EmailTemplate, STATUS, Log, Attachment
 from django.shortcuts import reverse
@@ -287,10 +288,6 @@ class OutgoingEmailAdmin(admin.ModelAdmin):
         return ', '.join(instance.to)
 
     to_display.short_description = _('To')
-
-    def save_related(self, request, form, formsets, change):
-        super(OutgoingEmailAdmin, self).save_related(request, form, formsets, change)
-        form.instance.update_related()
 
     def save_model(self, request, obj, form, change):
         super(OutgoingEmailAdmin, self).save_model(request, obj, form, change)
