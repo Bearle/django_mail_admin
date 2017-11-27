@@ -275,8 +275,6 @@ def requeue(modeladmin, request, queryset):
 requeue.short_description = _('Requeue selected emails')
 
 
-# TODO:use attachments, probable inline
-
 class OutgoingEmailAdmin(admin.ModelAdmin):
     inlines = (TemplateVariableInline, AttachmentInline)
     list_display = ['id', 'to_display', 'subject', 'template', 'from_email', 'status', 'scheduled_time', 'priority']
@@ -299,11 +297,15 @@ class OutgoingEmailAdmin(admin.ModelAdmin):
         obj.queue()
 
 
+class AttachmentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'file',)
+
+
 if getattr(settings, 'DJANGO_MAILADMIN_ADMIN_ENABLED', True):
     admin.site.register(IncomingEmail, IncomingEmailAdmin)
     admin.site.register(IncomingAttachment, IncomingAttachmentAdmin)
     admin.site.register(Mailbox, MailboxAdmin)
     admin.site.register(EmailTemplate, EmailTemplateAdmin)
     # Without this attachment inline won't have add/edit buttons
-    admin.site.register(Attachment)
+    admin.site.register(Attachment, AttachmentAdmin)
     admin.site.register(OutgoingEmail, OutgoingEmailAdmin)

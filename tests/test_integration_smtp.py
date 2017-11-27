@@ -36,6 +36,7 @@ class TestSmtp(TestCase):
                      priority=PRIORITY.now, backend='custom')
 
     def test_send_template(self):
+        # First try it manually
         template = EmailTemplate.objects.create(name='first', description='desc', subject='{{id}}',
                                                 email_html_text='{{id}}')
         email = create(self.test_from_email, self.test_from_email, template=template, priority=PRIORITY.now,
@@ -43,3 +44,7 @@ class TestSmtp(TestCase):
         v = TemplateVariable.objects.create(name='id', value=1, email=email)
         email = OutgoingEmail.objects.get(id=1)
         email.dispatch()
+
+        # Then try it with send()
+        email = send(self.test_from_email, self.test_from_email, template=template, priority=PRIORITY.now,
+                     backend='custom', variable_dict={'id': 1})

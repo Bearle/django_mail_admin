@@ -9,7 +9,7 @@ from django.template import Context, Template
 from django.utils.timezone import now
 
 from .connections import connections
-from .models import OutgoingEmail, EmailTemplate, Log, PRIORITY, STATUS, create_attachments
+from .models import OutgoingEmail, EmailTemplate, Log, PRIORITY, STATUS, create_attachments, TemplateVariable
 from .settings import (get_available_backends, get_batch_size,
                        get_log_level, get_sending_order, get_threads_per_process)
 from .utils import (parse_emails, parse_priority,
@@ -61,6 +61,7 @@ def create(sender, recipients=None, cc=None, bcc=None, subject='', message='',
 
 def send(sender, recipients=None, template=None, subject='',
          message='', html_message='', scheduled_time=None, headers=None,
+         variable_dict=None,
          priority=None, attachments=None,
          log_level=None, commit=True, cc=None, bcc=None, backend=''):
     """
@@ -112,6 +113,11 @@ def send(sender, recipients=None, template=None, subject='',
                    subject, message, html_message, scheduled_time, headers, template,
                    priority, commit=commit, backend=backend)
 
+    if variable_dict:
+        variables = []
+        for k, v in variable_dict.items():
+            variables.append(TemplateVariable(name=k, value=str(v), email=email))
+        TemplateVariable.objects.bulk_create(variables, 20)
     if attachments:
         attachments = create_attachments(attachments)
         email.attachments.add(*attachments)

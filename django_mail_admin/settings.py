@@ -40,7 +40,7 @@ def get_available_backends():
     # Fall back to Django's EMAIL_BACKEND definition
     backends['default'] = getattr(
         settings, 'EMAIL_BACKEND',
-        'django.core.mail.backends.smtp.EmailBackend')
+        'django_mail_admin.backends.CustomEmailBackend')
 
     # If EMAIL_BACKEND is set to use PostOfficeBackend
     # and DJANGO_MAIL_ADMIN_BACKEND is not set, fall back to SMTP

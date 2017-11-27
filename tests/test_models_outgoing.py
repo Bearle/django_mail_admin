@@ -1,8 +1,7 @@
 import django
 
-from datetime import datetime, timedelta
-
-from django.conf import settings as django_settings
+from datetime import timedelta
+from django.utils import timezone
 from django.core import mail
 from django.core.files.base import ContentFile
 from django.core.mail import EmailMessage, EmailMultiAlternatives
@@ -118,11 +117,6 @@ class OutgoingModelTest(TestCase):
         self.assertEqual(log.status, STATUS.failed)
         self.assertIn('is not a valid', log.message)
 
-    def test_default_sender(self):
-        email = send(['to@example.com'], subject='foo')
-        self.assertEqual(email.from_email,
-                         django_settings.DEFAULT_FROM_EMAIL)
-
     def test_send_argument_checking(self):
         """
         mail.send() should raise an Exception if:
@@ -148,9 +142,9 @@ class OutgoingModelTest(TestCase):
         """
         OutgoingEmail.objects.all().delete()
         headers = {'Reply-to': 'reply@email.com'}
-        email_template = EmailTemplate.objects.create(name='foo', subject='bar',
-                                                      content='baz')
-        scheduled_time = datetime.now() + timedelta(days=1)
+        email_template = EmailTemplate.objects.create(name='foo', subject='{{bar}}',
+                                                      email_html_text='{{baz}} {{booz}}')
+        scheduled_time = timezone.now() + timedelta(days=1)
         email = send(recipients=['to1@example.com', 'to2@example.com'], sender='from@a.com',
                      headers=headers, template=email_template,
                      scheduled_time=scheduled_time)
@@ -165,9 +159,20 @@ class OutgoingModelTest(TestCase):
         self.assertEqual(email.to, ['to1@example.com', 'to2@example.com'])
         self.assertEqual(email.headers, None)
 
+        # Now with variables
+        context = {'bar': 'foo', 'baz': 5, 'booz': tuple([6, 7])}
+        OutgoingEmail.objects.all().delete()
+        email = send(recipients=['to1@example.com', 'to2@example.com'], sender='from@a.com',
+                     template=email_template, variable_dict=context)
+        self.assertEqual(email.to, ['to1@example.com', 'to2@example.com'])
+        self.assertEqual(email.headers, None)
+        email_message = email.email_message()
+        self.assertEqual(email_message.subject, context['bar'])
+        self.assertEqual(email_message.alternatives[0][0], str(context['baz']) + " " + str(context['booz']))
+
     def test_send_without_template(self):
         headers = {'Reply-to': 'reply@email.com'}
-        scheduled_time = datetime.now() + timedelta(days=1)
+        scheduled_time = timezone.now() + timedelta(days=1)
         email = send(sender='from@a.com',
                      recipients=['to1@example.com', 'to2@example.com'],
                      cc=['cc1@example.com', 'cc2@example.com'],
@@ -185,16 +190,6 @@ class OutgoingModelTest(TestCase):
         self.assertEqual(email.headers, headers)
         self.assertEqual(email.priority, PRIORITY.low)
         self.assertEqual(email.scheduled_time, scheduled_time)
-
-        # Same thing, but now with context
-        email = send(['to1@example.com'], 'from@a.com',
-                     subject='Hi {{ name }}', message='Message {{ name }}',
-                     html_message='<b>{{ name }}</b>', headers=headers)
-        self.assertEqual(email.to, ['to1@example.com'])
-        self.assertEqual(email.subject, 'Hi Bob')
-        self.assertEqual(email.message, 'Message Bob')
-        self.assertEqual(email.html_message, '<b>Bob</b>')
-        self.assertEqual(email.headers, headers)
 
     def test_invalid_syntax(self):
         """
@@ -296,11 +291,6 @@ class OutgoingModelTest(TestCase):
         else:
             self.assertEqual(message.attachments,
                              [('test.txt', b'test file content', 'text/plain')])
-
-    def test_translated_template_uses_default_templates_name(self):
-        template = EmailTemplate.objects.create(name='name')
-        id_template = template.translated_templates.create(language='id')
-        self.assertEqual(id_template.name, template.name)
 
     def test_models_str(self):
         self.assertEqual(str(Attachment(name='test')), 'test')

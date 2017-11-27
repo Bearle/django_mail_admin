@@ -149,9 +149,10 @@ class OutgoingEmail(models.Model):
         # headers = {'From': f'"{default_from_name()}" <{self.from_email}>'}
         # TODO: deal with default headers
 
-        email_message = self.email_message()
+        email_message = None
         # Priority is handled in mail.send
         try:
+            email_message = self.email_message()
             email_message.send()
             status = STATUS.sent
             message = ''
@@ -161,7 +162,8 @@ class OutgoingEmail(models.Model):
             status = STATUS.failed
             message = str(e)
             exception_type = type(e).__name__
-            email_failed_to_send.send(sender=self, outgoing_email=email_message)
+            if email_message:
+                email_failed_to_send.send(sender=self, outgoing_email=email_message)
             # If run in a bulk sending mode, reraise and let the outer
             # layer handle the exception
             if not commit:
