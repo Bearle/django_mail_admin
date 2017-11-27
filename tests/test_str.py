@@ -13,7 +13,7 @@ class ModelsStrTest(TestCase):
         log = Log.objects.create(email=email, status=STATUS.sent)
         self.assertEqual(str(log), str(log.date))
         self.assertEqual(str(email),
-                         f"from@example.com -> ['test@example.com'] (test_subject)")
+                         "from@example.com -> ['test@example.com'] (test_subject)")
         attachments = create_attachments({
             'attachment_file1.txt': ContentFile('content'),
         })

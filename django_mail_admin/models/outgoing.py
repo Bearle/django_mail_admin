@@ -193,7 +193,7 @@ class OutgoingEmail(models.Model):
         super(OutgoingEmail, self).save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.from_email} -> {self.to} ({self.subject})"
+        return str(self.from_email)+" -> "+str(self.to)+" ("+self.subject+")"
 
 
 class Attachment(models.Model):
