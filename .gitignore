@@ -28,8 +28,6 @@ pip-log.txt
 nosetests.xml
 htmlcov
 
-# Translations
-*.mo
 
 # Mr Developer
 .mr.developer.cfg

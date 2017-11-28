@@ -45,23 +45,14 @@ Add it to your `INSTALLED_APPS`:
         ...
     )
 
-Add django mail admin's URL patterns:
-
-.. code-block:: python
-
-    from django_mail_admin import urls as django_mail_admin_urls
-
-
-    urlpatterns = [
-        ...
-        url(r'^', include(django_mail_admin_urls)),
-        ...
-    ]
-
 Features
 --------
 
-* TODO
+* Everything django-mailbox has
+* Everything django-post-office has
+* Database configurations - activate an outbox to send from, activate a mailbox to receive from
+* Templates
+* Translatable
 
 
 Optional requirements
