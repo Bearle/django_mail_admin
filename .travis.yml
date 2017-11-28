@@ -8,14 +8,14 @@ python:
   - 3.5
   - 3.6
 env:
-  - DJANGO=1.8
+#  - DJANGO=1.8
   - DJANGO=1.9
   - DJANGO=1.10
   - DJANGO=1.11
 matrix:
   exclude:
     # Python/Django combinations that aren't officially supported
-    - { python: 3.6, env: DJANGO=1.8 }
+#    - { python: 3.6, env: DJANGO=1.8 }
     - { python: 3.3, env: DJANGO=1.9 }
     - { python: 3.6, env: DJANGO=1.9 }
     - { python: 3.3, env: DJANGO=1.10 }

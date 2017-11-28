@@ -28,6 +28,9 @@ The full documentation is at https://django_mail_admin.readthedocs.io.
 Quickstart
 ----------
 
+**Q**: What versions of Django/Python are supported?
+**A**: Take a look at https://travis-ci.org/delneg/django_mail_admin
+
 Install django mail admin::
 
     pip install django_mail_admin
