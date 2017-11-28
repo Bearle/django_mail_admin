@@ -298,6 +298,11 @@ class AttachmentAdmin(admin.ModelAdmin):
     list_display = ('name', 'file',)
 
 
+class OutboxAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email_host', 'email_host_user', 'email_port', 'id', 'active')
+    list_filter = ('active',)
+
+
 if getattr(settings, 'DJANGO_MAILADMIN_ADMIN_ENABLED', True):
     admin.site.register(IncomingEmail, IncomingEmailAdmin)
     admin.site.register(IncomingAttachment, IncomingAttachmentAdmin)
@@ -306,3 +311,4 @@ if getattr(settings, 'DJANGO_MAILADMIN_ADMIN_ENABLED', True):
     # Without this attachment inline won't have add/edit buttons
     admin.site.register(Attachment, AttachmentAdmin)
     admin.site.register(OutgoingEmail, OutgoingEmailAdmin)
+    admin.site.register(Outbox, OutboxAdmin)

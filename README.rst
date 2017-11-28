@@ -75,6 +75,21 @@ So I've decided merging those two and clearing the mess in between them as well 
 
 **A**: Because f*ck python2. Really, it's been 9 (NINE!) years since it came out. Go ahead and check out https://github.com/brettcannon/caniusepython3
 
+**Q**: Why is it named django_mail_admin, what does it have to do with admin ?
+
+**A**: Well, the first version of this package (which was living just in a really large admin.py) was used for easy mail management using standard Django admin interface.
+
+**Q**: What languages are available?
+
+**A**: Currently there's Russian and English languages available. Feel free to add yours:
+
+::
+
+    source <YOURVIRTUALENV>/bin/activate
+    python manage.py makemessages -l YOUR_LOCALE -i venv
+    python manage.py compilemessages -l YOUR_LOCALE
+
+
 **Q**: Why did you delete support for multi-lingual templates?
 
 **A**: Well, we have django-model-translations for that. You can easily fork this app and override EmailTemplate model (models/templates.py) accordingly.
@@ -88,9 +103,6 @@ I think there's no need for such an overhead in a mail-related app.
 
 **A**: Feel free to reach me out using issues and pull requests, I'll review them all and answer when I can.
 
-**Q**: Why is it named django_mail_admin, what does it have to do with admin ?
-
-**A**: Well, the first version of this package (which was living just in a really large admin.py) was used for easy mail management using standard Django admin interface.
 
 
 Running Tests
