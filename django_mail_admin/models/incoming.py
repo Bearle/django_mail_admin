@@ -308,6 +308,7 @@ class IncomingAttachment(models.Model):
         related_name='attachments',
         null=True,
         blank=True,
+        on_delete=models.CASCADE,
         verbose_name=_('IncomingEmail'),
     )
 
