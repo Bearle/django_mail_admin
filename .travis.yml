@@ -3,10 +3,10 @@
 language: python
 
 python:
-  - "3.6"
-  - "3.5"
-  - "3.4"
-  - "3.3"
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.6
 env:
   - DJANGO=1.8
   - DJANGO=1.9
