@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.template import Template, TemplateSyntaxError, TemplateDoesNotExist
 from django.utils.encoding import force_text
+from django.utils.translation import ugettext_lazy as _
 
 
 def validate_email_with_name(value):
@@ -13,12 +14,16 @@ def validate_email_with_name(value):
     value = force_text(value)
 
     if '<' and '>' in value:
+        lesses = value.count('<')
+        biggers = value.count('>')
+        if lesses > 1 or biggers > 1:
+            raise ValidationError(_('Error in email address name - more than one "<" or ">" symbols'))
         start = value.find('<') + 1
         end = value.find('>')
         if start < end:
             recipient = value[start:end]
         else:
-            raise ValidationError('Error in email address name')
+            raise ValidationError(_('Error in email address name - ">" is before "<"'))
     else:
         recipient = value
 
