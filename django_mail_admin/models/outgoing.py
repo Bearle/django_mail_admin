@@ -18,7 +18,6 @@ from django.template import Template, Context
 logger = logging.getLogger(__name__)
 
 
-# TODO: implement mailings
 class OutgoingEmail(models.Model):
     PRIORITY_CHOICES = [(PRIORITY.low, _("low")), (PRIORITY.medium, _("medium")),
                         (PRIORITY.high, _("high")), (PRIORITY.now, _("now"))]

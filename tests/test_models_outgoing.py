@@ -1,5 +1,5 @@
 import django
-
+import copy
 from datetime import timedelta
 from django.utils import timezone
 from django.core import mail
@@ -9,7 +9,7 @@ from django.forms.models import modelform_factory
 from django.test import TestCase
 from django.test.utils import override_settings
 from django_mail_admin.models import OutgoingEmail, Log, PRIORITY, STATUS, EmailTemplate, Attachment, TemplateVariable
-from django_mail_admin.mail import send
+from django_mail_admin.mail import send, send_many, get_queued
 
 
 class OutgoingModelTest(TestCase):
@@ -311,3 +311,33 @@ class OutgoingModelTest(TestCase):
         self.assertEqual(str(Attachment(name='test')), 'test')
         self.assertEqual(str(EmailTemplate(name='test')),
                          'test')
+
+    def test_send_many(self):
+        emails = [dict(sender='from@a.com',
+                       recipients=['to1@example.com', 'to2@example.com'],
+                       cc=['cc1@example.com', 'cc2@example.com'],
+                       bcc=['bcc1@example.com', 'bcc2@example.com'],
+                       subject='foo', message='bar', html_message='baz'),
+                  dict(sender='from@a.com',
+                       recipients=['to3@example.com', 'to4@example.com'],
+                       cc=['cc3@example.com', 'cc4@example.com'],
+                       bcc=['bcc3@example.com', 'bcc4@example.com'],
+                       subject='fooo', message='barr', html_message='bazz'),
+                  ]
+        with self.assertRaises(ValueError):
+            emails_falsy = copy.deepcopy(emails)
+            emails_falsy[0]['priority'] = PRIORITY.now
+            send_many(emails_falsy)
+        with self.assertRaises(ValueError):
+            emails_falsy = copy.deepcopy(emails)
+            attachment = Attachment()
+            attachment.file.save(
+                'test.txt', content=ContentFile('test file content'), save=True
+            )
+            attachment.mimetype = 'text/plain'
+            attachment.save()
+            emails_falsy[0]['attachments'] = [attachment]
+            send_many(emails_falsy)
+        send_many(emails)
+        queued = get_queued()
+        self.assertEqual(queued.count(), 2)

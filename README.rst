@@ -19,6 +19,21 @@ The one and only django app to receive & send mail with templates and multiple c
 Work In progress!
 =================
 
+Features
+--------
+
+* Everything django-mailbox has
+* Everything django-post-office has
+* Database configurations - activate an outbox to send from, activate a mailbox to receive from
+* Templates
+* Translatable
+* Mailings - using send_many() or 'cc' and 'bcc' or even recipients - all of those accept comma-separated lists of emails
+
+Dependencies
+============
+
+* `django >= 1.9 <http://djangoproject.com/>`_
+* `django-jsonfield <https://github.com/bradjasper/django-jsonfield>`_
 
 Documentation
 -------------
@@ -45,14 +60,52 @@ Add it to your `INSTALLED_APPS`:
         ...
     )
 
-Features
---------
+* Run ``migrate``::
 
-* Everything django-mailbox has
-* Everything django-post-office has
-* Database configurations - activate an outbox to send from, activate a mailbox to receive from
-* Templates
-* Translatable
+    python manage.py migrate
+
+* Set ``django_mail_admin.backends.CustomEmailBackend`` as your ``EMAIL_BACKEND`` in django's ``settings.py``::
+
+    EMAIL_BACKEND = 'django_mail_admin.backends.CustomEmailBackend'
+
+
+
+Custom Email Backends
+---------------------
+
+By default, ``django_mail_admin`` uses custom Email Backends that looks up for Outbox models in database. If you want to
+use a different backend, you can do so by configuring ``BACKENDS``, though you will not be able to use Outboxes and will have to set EMAIL_HOST etc. in django's ``settings.py``.
+
+For example if you want to use `django-ses <https://github.com/hmarr/django-ses>`_::
+
+    DJANGO_MAIL_ADMIN = {
+        'BACKENDS': {
+            'default': 'django_mail_admin.backends.CustomEmailBackend',
+            'smtp': 'django.core.mail.backends.smtp.EmailBackend',
+            'ses': 'django_ses.SESBackend',
+        }
+    }
+
+You can then choose what backend you want to use when sending mail:
+
+.. code-block:: python
+
+    # If you omit `backend_alias` argument, `default` will be used
+    mail.send(
+        'from@example.com',
+        ['recipient@example.com'],
+        subject='Hello',
+    )
+
+    # If you want to send using `ses` backend
+    mail.send(
+        'from@example.com',
+        ['recipient@example.com'],
+        subject='Hello',
+        backend='ses',
+    )
+
+
 
 
 Optional requirements
