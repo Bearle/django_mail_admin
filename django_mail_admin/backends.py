@@ -3,7 +3,6 @@ from .models import Outbox
 import threading
 
 
-# Copied from django-post-office backends.EmailBackend
 class CustomEmailBackend(EmailBackend):
     def __init__(self, host=None, port=None, username=None, password=None,
                  use_tls=None, fail_silently=False, use_ssl=None, timeout=None,
