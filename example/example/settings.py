@@ -122,3 +122,4 @@ STATIC_URL = '/static/'
 INSTALLED_APPS += (
     'django_admin_row_actions',
 )
+EMAIL_BACKEND = 'django_mail_admin.backends.CustomEmailBackend'
