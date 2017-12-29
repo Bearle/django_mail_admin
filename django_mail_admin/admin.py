@@ -118,7 +118,6 @@ def custom_titled_filter(title):
     return Wrapper
 
 
-# TODO: deal with read/unread
 class IncomingEmailAdmin(admin.ModelAdmin):
     def html(self, msg):
         return mark_safe(msg.html)
@@ -241,7 +240,7 @@ class TemplateVariableInline(admin.TabularInline):
 
 def get_message_preview(instance):
     return ('{0}...'.format(instance.message[:25]) if len(instance.message) > 25
-            else instance.message)
+    else instance.message)
 
 
 get_message_preview.short_description = _('Message')

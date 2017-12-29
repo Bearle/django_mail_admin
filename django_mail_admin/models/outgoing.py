@@ -147,9 +147,6 @@ class OutgoingEmail(models.Model):
         Sends email and log the result.
         """
 
-        # headers = {'From': f'"{default_from_name()}" <{self.from_email}>'}
-        # TODO: deal with default headers
-
         email_message = None
         # Priority is handled in mail.send
         try:
@@ -192,7 +189,7 @@ class OutgoingEmail(models.Model):
         super(OutgoingEmail, self).save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.from_email)+" -> "+str(self.to)+" ("+self.subject+")"
+        return str(self.from_email) + " -> " + str(self.to) + " (" + self.subject + ")"
 
 
 class Attachment(models.Model):
