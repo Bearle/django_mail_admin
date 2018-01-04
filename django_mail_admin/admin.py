@@ -12,6 +12,8 @@ from django_mail_admin.signals import message_received
 from django.utils import timezone
 from django.forms.widgets import TextInput
 from .fields import CommaSeparatedEmailField
+from .forms import OutgoingEmailAdminForm
+from django.contrib import messages
 
 logger = logging.getLogger(__name__)
 from django.utils.translation import ugettext_lazy as _
@@ -46,7 +48,11 @@ def get_parent():
 def get_new_mail(mailbox_admin, request, queryset):
     for mailbox in queryset.all():
         logger.debug('Receiving mail for %s' % mailbox)
-        mailbox.get_new_mail()
+        got_mail = mailbox.get_new_mail()
+        if len(got_mail) > 0:
+            messages.success(request, _('Got {} new letters for mailbox "{}"').format(str(len(got_mail)), mailbox.name))
+        else:
+            messages.info(request, _('No new mail for mailbox "{}"').format(mailbox.name))
 
 
 get_new_mail.short_description = _('Get new mail')
@@ -136,6 +142,16 @@ class IncomingEmailAdmin(admin.ModelAdmin):
 
     mailbox_link.short_description = _('Mailbox')
 
+    def reply_link(self, msg):
+        if msg.in_reply_to:
+            return mark_safe(
+                '<a href="' + reverse('admin:django_mail_admin_outgoingemail_change',
+                                      args=[msg.in_reply_to.pk]) + '">' + msg.in_reply_to.subject + '</a>')
+        else:
+            return ''
+
+    reply_link.short_description = _('Reply to')
+
     def from_address(self, msg):
         f = msg.from_address
         if len(f) > 0:
@@ -168,6 +184,7 @@ class IncomingEmailAdmin(admin.ModelAdmin):
         'read',
         'mailbox_link',
         'attachment_count',
+        'reply_link'
     )
     ordering = ['-processed']
     list_filter = (
@@ -282,6 +299,7 @@ class OutgoingEmailAdmin(admin.ModelAdmin):
         CommaSeparatedEmailField: {'widget': CommaSeparatedEmailWidget}
     }
     actions = [requeue]
+    form = OutgoingEmailAdminForm
 
     def to_display(self, instance):
         return ', '.join(instance.to)
@@ -290,6 +308,9 @@ class OutgoingEmailAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super(OutgoingEmailAdmin, self).save_model(request, obj, form, change)
+        if form.cleaned_data['reply']:
+            obj.headers = form.cleaned_data['reply'].get_reply_headers(obj.headers)
+            obj.save()
         obj.queue()
 
 

@@ -16,6 +16,7 @@ from django.core.mail.message import make_msgid
 from quopri import encode as encode_quopri
 from django.core.exceptions import ValidationError
 
+
 class UnreadMessageManager(models.Manager):
     def get_queryset(self):
         return super(UnreadMessageManager, self).get_queryset().filter(
@@ -135,7 +136,13 @@ class IncomingEmail(models.Model):
                 )
         return addresses
 
-    # TODO: remember to add some kind of a reply select to outgoin email admin
+    def get_reply_headers(self, headers=None):
+        headers = headers or {}
+        headers['Message-ID'] = make_msgid()
+        headers['Date'] = formatdate()
+        headers['In-Reply-To'] = self.message_id.strip()
+        return headers
+
     def reply(self, **kwargs):
         """Sends a message as a reply to this message instance.
 
@@ -151,10 +158,7 @@ class IncomingEmail(models.Model):
                 raise ValidationError('No sender address to reply from, %s' % str(self))
             else:
                 kwargs['sender'] = self.from_address[0] or self.mailbox.from_email
-        headers = kwargs.get('headers') or {}
-        headers['Message-ID'] = make_msgid()
-        headers['Date'] = formatdate()
-        headers['In-Reply-To'] = self.message_id.strip()
+        headers = self.get_reply_headers(kwargs.get('headers'))
         kwargs['headers'] = headers
         return send(**kwargs)
 
@@ -221,8 +225,8 @@ class IncomingEmail(models.Model):
             except IncomingAttachment.DoesNotExist:
                 new[settings['altered_message_header']] = (
                     'Missing; Attachment %s not found' % (
-                        msg[settings['attachment_interpolation_header']]
-                    )
+                    msg[settings['attachment_interpolation_header']]
+                )
                 )
                 new.set_payload('')
         else:
