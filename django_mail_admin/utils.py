@@ -3,10 +3,9 @@ import email.header
 import logging
 import os
 from collections import namedtuple
-from django_mail_admin.settings import get_default_priority
+from django_mail_admin.settings import get_default_priority, get_default_charset, get_attachment_upload_to
 from django.conf import settings
 from .validators import validate_email_with_name
-from django.utils.encoding import force_text
 from django.core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
@@ -78,7 +77,7 @@ def get_settings():
 
 
 def convert_header_to_unicode(header):
-    default_charset = get_settings()['default_charset']
+    default_charset = get_default_charset()
 
     def _decode(value, encoding):
         if isinstance(value, str):
@@ -111,7 +110,7 @@ def get_body_from_message(message, maintype, subtype):
     body = ''
     for part in message.walk():
         if part.get_content_maintype() == maintype and \
-                part.get_content_subtype() == subtype:
+            part.get_content_subtype() == subtype:
             charset = part.get_content_charset()
             this_part = part.get_payload(decode=True)
             if charset:
@@ -145,11 +144,10 @@ def get_body_from_message(message, maintype, subtype):
 
 # TODO: deal with saving - links in admin seem to be broken
 def get_attachment_save_path(instance, filename):
-    _settings = get_settings()
     if hasattr(instance, 'name'):
         if not instance.name:
             instance.name = filename  # set original filename
-    path = _settings['attachment_upload_to']
+    path = get_attachment_upload_to()
     if '%' in path:
         path = datetime.datetime.utcnow().strftime(path)
 

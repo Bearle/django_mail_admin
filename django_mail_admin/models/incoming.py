@@ -6,8 +6,9 @@ from email.encoders import encode_base64
 from email.message import Message as EmailMessage
 from email.utils import formatdate, parseaddr
 import gzip
-from django_mail_admin.utils import get_body_from_message, get_settings, get_attachment_save_path, \
+from django_mail_admin.utils import get_body_from_message, get_attachment_save_path, \
     convert_header_to_unicode
+from django_mail_admin.settings import get_attachment_interpolation_header, get_altered_message_header
 import base64
 import email
 import logging
@@ -182,7 +183,6 @@ class IncomingEmail(models.Model):
 
     def _rehydrate(self, msg):
         new = EmailMessage()
-        settings = get_settings()
 
         if msg.is_multipart():
             for header, value in msg.items():
@@ -191,10 +191,10 @@ class IncomingEmail(models.Model):
                 new.attach(
                     self._rehydrate(part)
                 )
-        elif settings['attachment_interpolation_header'] in msg.keys():
+        elif get_attachment_interpolation_header() in msg.keys():
             try:
                 attachment = IncomingAttachment.objects.get(
-                    pk=msg[settings['attachment_interpolation_header']]
+                    pk=msg[get_attachment_interpolation_header()]
                 )
                 for header, value in attachment.items():
                     new[header] = value
@@ -223,9 +223,9 @@ class IncomingEmail(models.Model):
                     del new['Content-Transfer-Encoding']
                     encode_base64(new)
             except IncomingAttachment.DoesNotExist:
-                new[settings['altered_message_header']] = (
+                new[get_altered_message_header()] = (
                     'Missing; Attachment %s not found' % (
-                    msg[settings['attachment_interpolation_header']]
+                    msg[get_attachment_interpolation_header()]
                 )
                 )
                 new.set_payload('')

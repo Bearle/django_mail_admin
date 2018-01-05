@@ -3,7 +3,6 @@ import warnings
 from django.conf import settings
 from django.core.cache.backends.base import InvalidCacheBackendError
 from django.core.cache import caches
-from django.utils.module_loading import import_string
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -72,7 +71,7 @@ def get_cache_backend():
 
 def get_config():
     """
-    Returns Post Office's configuration in dictionary format. e.g:
+    Returns Django Mail Admin's configuration in dictionary format. e.g:
     DJANGO_MAIL_ADMIN = {
         'BATCH_SIZE': 1000
     }
@@ -98,3 +97,43 @@ def get_log_level():
 
 def get_sending_order():
     return get_config().get('SENDING_ORDER', ['-priority'])
+
+
+def strip_unallowed_mimetypes():
+    return get_config().get('STRIP_UNALLOWED_MIMETYPES', False)
+
+
+def get_allowed_mimetypes():
+    return get_config().get('ALLOWED_MIMETYPES', ['text/plain', 'text/html'])
+
+
+def get_text_stored_mimetypes():
+    return get_config().get('TEXT_STORED_MIMETYPES', ['text/plain', 'text/html'])
+
+
+def get_altered_message_header():
+    return get_config().get('ALTERED_MESSAGE_HEADER', 'X-Django-Mail-Admin-Altered-Message')
+
+
+def get_attachment_interpolation_header():
+    return get_config().get('ATTACHMENT_INTERPOLATION_HEADER', 'X-Django-Mail-Admin-Interpolate-Attachment')
+
+
+def get_attachment_upload_to():
+    return get_config().get('ATTACHMENT_UPLOAD_TO', 'mail_admin_attachments/%Y/%m/%d/')
+
+
+def get_store_original_message():
+    return get_config().get('STORE_ORIGINAL_MESSAGE', True)
+
+
+def get_compress_original_message():
+    return get_config().get('COMPRESS_ORIGINAL_MESSAGE', False)
+
+
+def get_original_message_compression():
+    return get_config().get('ORIGINAL_MESSAGE_COMPRESSION', 6)
+
+
+def get_default_charset():
+    return get_config().get('DEFAULT_CHARSET', 'iso8859-1')

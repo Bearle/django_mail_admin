@@ -23,6 +23,9 @@ from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 
 from django_mail_admin import utils
+from django_mail_admin.settings import get_allowed_mimetypes, strip_unallowed_mimetypes, \
+    get_altered_message_header, get_text_stored_mimetypes, get_store_original_message, \
+    get_compress_original_message, get_attachment_interpolation_header
 from django_mail_admin.signals import message_received
 from django_mail_admin.transports import Pop3Transport, ImapTransport, \
     MaildirTransport, MboxTransport, BabylTransport, MHTransport, \
@@ -271,7 +274,6 @@ class Mailbox(models.Model):
 
     def _get_dehydrated_message(self, msg, record):
         from django_mail_admin.models import IncomingAttachment
-        settings = utils.get_settings()
 
         new = EmailMessage()
         if msg.is_multipart():
@@ -282,25 +284,25 @@ class Mailbox(models.Model):
                     self._get_dehydrated_message(part, record)
                 )
         elif (
-                settings['strip_unallowed_mimetypes']
-            and not msg.get_content_type() in settings['allowed_mimetypes']
+            strip_unallowed_mimetypes()
+            and not msg.get_content_type() in get_allowed_mimetypes()
         ):
             for header, value in msg.items():
                 new[header] = value
             # Delete header, otherwise when attempting to  deserialize the
             # payload, it will be expecting a body for this.
             del new['Content-Transfer-Encoding']
-            new[settings['altered_message_header']] = (
+            new[get_altered_message_header()] = (
                 'Stripped; Content type %s not allowed' % (
-                    msg.get_content_type()
-                )
+                msg.get_content_type()
+            )
             )
             new.set_payload('')
         elif (
-                (
-                        msg.get_content_type() not in settings['text_stored_mimetypes']
-                ) or
-                ('attachment' in msg.get('Content-Disposition', ''))
+            (
+                msg.get_content_type() not in get_text_stored_mimetypes()
+            ) or
+            ('attachment' in msg.get('Content-Disposition', ''))
         ):
             filename = None
             raw_filename = msg.get_filename()
@@ -330,7 +332,7 @@ class Mailbox(models.Model):
 
             placeholder = EmailMessage()
             placeholder[
-                settings['attachment_interpolation_header']
+                get_attachment_interpolation_header()
             ] = str(attachment.pk)
             new = placeholder
         else:
@@ -370,9 +372,8 @@ class Mailbox(models.Model):
     def _process_message(self, message):
         from django_mail_admin.models import IncomingEmail, OutgoingEmail
         msg = IncomingEmail()
-        settings = utils.get_settings()
 
-        if settings['store_original_message']:
+        if get_store_original_message():
             self._process_save_original_message(message, msg)
         msg.mailbox = self
         if 'subject' in message:
@@ -412,8 +413,7 @@ class Mailbox(models.Model):
         return msg
 
     def _process_save_original_message(self, message, msg):
-        settings = utils.get_settings()
-        if settings['compress_original_message']:
+        if get_compress_original_message():
             with NamedTemporaryFile(suffix=".eml.gz") as fp_tmp:
                 with gzip.GzipFile(fileobj=fp_tmp, mode="w") as fp:
                     fp.write(message.as_string().encode('utf-8'))
