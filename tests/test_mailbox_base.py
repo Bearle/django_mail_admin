@@ -7,8 +7,7 @@ from django.test import TestCase
 
 from django_mail_admin import models
 from django_mail_admin.models import Mailbox, IncomingEmail
-from django_mail_admin.utils import get_settings
-
+from django_mail_admin.settings import get_allowed_mimetypes,strip_unallowed_mimetypes,get_text_stored_mimetypes
 class EmailIntegrationTimeout(Exception):
     pass
 
@@ -32,13 +31,12 @@ class EmailMessageTestCase(TestCase):
     ]
 
     def setUp(self):
-        dm_settings = get_settings()
 
-        self._ALLOWED_MIMETYPES = dm_settings['allowed_mimetypes']
+        self._ALLOWED_MIMETYPES = get_allowed_mimetypes()
         self._STRIP_UNALLOWED_MIMETYPES = (
-            dm_settings['strip_unallowed_mimetypes']
+            strip_unallowed_mimetypes()
         )
-        self._TEXT_STORED_MIMETYPES = dm_settings['text_stored_mimetypes']
+        self._TEXT_STORED_MIMETYPES = get_text_stored_mimetypes()
 
         self.mailbox = Mailbox.objects.create(from_email='from@example.com')
 

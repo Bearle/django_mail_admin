@@ -11,7 +11,7 @@ from django_mail_admin import utils
 from .test_mailbox_base import EmailMessageTestCase
 from django.utils.encoding import force_text
 from django.core.mail import EmailMessage
-
+from django_mail_admin.settings import get_config
 
 class TestProcessEmail(EmailMessageTestCase):
     def test_message_without_attachments(self):
@@ -276,8 +276,14 @@ class TestProcessEmail(EmailMessageTestCase):
         email_object = self._get_email_object(
             'message_with_invalid_content_for_declared_encoding.eml',
         )
+        default_settings = get_config()
 
-        msg = self.mailbox.process_incoming_message(email_object)
+        with mock.patch('django_mail_admin.settings.get_config') as get_settings:
+            altered = copy.deepcopy(default_settings)
+            altered['STORE_ORIGINAL_MESSAGE'] = False
+            get_settings.return_value = altered
+
+            msg = self.mailbox.process_incoming_message(email_object)
 
         msg.text
 
@@ -366,11 +372,11 @@ class TestProcessEmail(EmailMessageTestCase):
     def test_message_saved(self):
         message = self._get_email_object('generic_message.eml')
 
-        default_settings = utils.get_settings()
+        default_settings = get_config()
 
-        with mock.patch('django_mail_admin.utils.get_settings') as get_settings:
+        with mock.patch('django_mail_admin.settings.get_config') as get_settings:
             altered = copy.deepcopy(default_settings)
-            altered['store_original_message'] = True
+            altered['STORE_ORIGINAL_MESSAGE'] = True
             get_settings.return_value = altered
 
             msg = self.mailbox.process_incoming_message(message)
@@ -388,11 +394,11 @@ class TestProcessEmail(EmailMessageTestCase):
     def test_message_saving_ignored(self):
         message = self._get_email_object('generic_message.eml')
 
-        default_settings = utils.get_settings()
+        default_settings = get_config()
 
-        with mock.patch('django_mail_admin.utils.get_settings') as get_settings:
+        with mock.patch('django_mail_admin.settings.get_config') as get_settings:
             altered = copy.deepcopy(default_settings)
-            altered['store_original_message'] = False
+            altered['STORE_ORIGINAL_MESSAGE'] = False
             get_settings.return_value = altered
 
             msg = self.mailbox.process_incoming_message(message)
@@ -402,12 +408,13 @@ class TestProcessEmail(EmailMessageTestCase):
     def test_message_compressed(self):
         message = self._get_email_object('generic_message.eml')
 
-        default_settings = utils.get_settings()
+        default_settings = get_config()
 
-        with mock.patch('django_mail_admin.utils.get_settings') as get_settings:
+        with mock.patch('django_mail_admin.settings.get_config') as get_settings:
             altered = copy.deepcopy(default_settings)
-            altered['compress_original_message'] = True
-            altered['store_original_message'] = True
+
+            altered['COMPRESS_ORIGINAL_MESSAGE'] = True
+            altered['STORE_ORIGINAL_MESSAGE'] = True
             get_settings.return_value = altered
 
             msg = self.mailbox.process_incoming_message(message)
