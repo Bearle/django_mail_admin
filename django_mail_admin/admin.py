@@ -311,6 +311,7 @@ class OutgoingEmailAdmin(admin.ModelAdmin):
         if form.cleaned_data['reply']:
             obj.headers = form.cleaned_data['reply'].get_reply_headers(obj.headers)
             obj.save()
+        # TODO: add setting to only queue emails after pressing a button/etc.
         obj.queue()
 
 

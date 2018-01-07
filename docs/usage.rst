@@ -2,25 +2,6 @@
 Usage
 =====
 
-To use django mail admin in a project, add it to your `INSTALLED_APPS`:
+After you've installed Django Mail Admin, you can:
 
-.. code-block:: python
-
-    INSTALLED_APPS = (
-        ...
-        'django_mail_admin',
-        ...
-    )
-
-Add django mail admin's URL patterns:
-
-.. code-block:: python
-
-    from django_mail_admin import urls as django_mail_admin_urls
-
-
-    urlpatterns = [
-        ...
-        url(r'^', include(django_mail_admin_urls)),
-        ...
-    ]
+1. Set up

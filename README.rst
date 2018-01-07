@@ -1,5 +1,5 @@
 =============================
-django mail admin
+Django Mail Admin
 =============================
 
 .. image:: https://badge.fury.io/py/django_mail_admin.svg
@@ -12,12 +12,6 @@ django mail admin
     :target: https://codecov.io/gh/delneg/django_mail_admin
 
 The one and only django app to receive & send mail with templates and multiple configurations.
-
-
-
-=================
-Work In progress!
-=================
 
 Features
 --------
@@ -68,6 +62,12 @@ Add it to your `INSTALLED_APPS`:
 
     EMAIL_BACKEND = 'django_mail_admin.backends.CustomEmailBackend'
 
+
+* Set cron/Celery/RQ job to send/receive email, e.g. ::
+
+    * * * * * (cd $PROJECT; python manage.py send_queued_mail --processes=1 >> $PROJECT/cron_mail.log 2>&1)
+    * * * * * (cd $PROJECT; python manage.py get_new_mail >> $PROJECT/cron_mail_receive.log 2>&1)
+    0 1 * * * (cd $PROJECT; python manage.py cleanup_mail --days=30 >> $PROJECT/cron_mail_cleanup.log 2>&1)
 
 
 Custom Email Backends
