@@ -175,7 +175,7 @@ class OutgoingModelTest(TestCase):
         self.assertEqual(email.headers, None)
 
         # Now with variables
-        context = {'bar': 'foo', 'baz': 5, 'booz': tuple([6, 7])}
+        context = {'bar': 'foo', 'baz': 5, 'booz': (6, 7)}
         OutgoingEmail.objects.all().delete()
         email = send(recipients=['to1@example.com', 'to2@example.com'], sender='from@a.com',
                      template=email_template, variable_dict=context)
@@ -184,6 +184,20 @@ class OutgoingModelTest(TestCase):
         email_message = email.email_message()
         self.assertEqual(email_message.subject, context['bar'])
         self.assertEqual(email_message.alternatives[0][0], str(context['baz']) + " " + str(context['booz']))
+
+        # Now with tags
+        OutgoingEmail.objects.all().delete()
+        email_template_tags = \
+            EmailTemplate.objects.create(name='foo',
+                                         subject='{{bar|capfirst}}',
+                                         email_html_text='{{ baz }} {{ booz|first }}')
+        email = send(recipients=['to1@example.com', 'to2@example.com'], sender='from@a.com',
+                     template=email_template_tags, variable_dict=context)
+        self.assertEqual(email.to, ['to1@example.com', 'to2@example.com'])
+        self.assertEqual(email.headers, None)
+        email_message = email.email_message()
+        self.assertEqual(email_message.subject, context['bar'][0].upper() + context['bar'][1:])
+        self.assertEqual(email_message.alternatives[0][0], str(context['baz']) + " " + "(")
 
     def test_send_without_template(self):
         headers = {'Reply-to': 'reply@email.com'}

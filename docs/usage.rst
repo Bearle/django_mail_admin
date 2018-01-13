@@ -44,6 +44,46 @@ If you want to use templates: create an
                priority=models.PRIORITY.now,
                variable_dict={'id': 1})
 
+Template variables & tags
+-------------------------
+
+
+``Django mail admin`` supports Django's template tags and variables.
+It is important to note, however, that due to usage of TemplateVariable db-model,
+only strings can be stored as value, and anything in the template will be treated as a string.
+
+For example, ``'foo': [5,6]`` when called in template as ``{{ foo|first }}`` will result in ``[``,
+not in ``5``. Please keep this in mind.
+
+As an example of usage, if you put "Hello, {{ name }}" in the subject line and pass in
+``{'name': 'Alice'}`` as variable_dict, you will get "Hello, Alice" as subject:
+
+.. code-block:: python
+
+    from post_office import mail, models
+
+    models.EmailTemplate.objects.create(
+        name='morning_greeting',
+        subject='Morning, {{ name|capfirst }}',
+        content='Hi {{ name }}, how are you feeling today?',
+        html_content='Hi <strong>{{ name }}</strong>, how are you feeling today?',
+    )
+
+    mail.send(
+        'from@example.com',
+        'recipient@example.com', # List of email addresses also accepted
+        template=template,
+        priority=models.PRIORITY.now,
+        variable_dict={'name': 'alice'})
+    )
+
+    # This will create an email with the following content:
+    subject = 'Morning, Alice',
+    content = 'Hi alice, how are you feeling today?'
+    content = 'Hi <strong>alice</strong>, how are you feeling today?'
+
+
+
 Management Commands
 -------------------
 
