@@ -82,7 +82,142 @@ As an example of usage, if you put "Hello, {{ name }}" in the subject line and p
     content = 'Hi alice, how are you feeling today?'
     content = 'Hi <strong>alice</strong>, how are you feeling today?'
 
+mail.send()
+-----------
 
+``mail.send`` is the most important function in this library, it takes these
+arguments:
+
++--------------------+----------+--------------------------------------------------+
+| Argument           | Required | Description                                      |
++--------------------+----------+--------------------------------------------------+
+| recipients         | No       | list of recipient email addresses                |
++--------------------+----------+--------------------------------------------------+
+| sender             | Yes      | Defaults to ``settings.DEFAULT_FROM_EMAIL``,     |
+|                    |          | display name is allowed (``John <john@a.com>``)  |
++--------------------+----------+--------------------------------------------------+
+| subject            | No       | Email subject (if ``template`` is not specified) |
++--------------------+----------+--------------------------------------------------+
+| message            | No       | Email content (if ``template`` is not specified) |
++--------------------+----------+--------------------------------------------------+
+| html_message       | No       | HTML content (if ``template`` is not specified)  |
++--------------------+----------+--------------------------------------------------+
+| template           | No       | ``EmailTemplate`` instance                       |
++--------------------+----------+--------------------------------------------------+
+| cc                 | No       | list emails, will appear in ``cc`` field         |
++--------------------+----------+--------------------------------------------------+
+| bcc                | No       | list of emails, will appear in `bcc` field       |
++--------------------+----------+--------------------------------------------------+
+| attachments        | No       | Email attachments - A dictionary where the keys  |
+|                    |          | are the filenames and the values are either:     |
+|                    |          |                                                  |
+|                    |          | * files                                          |
+|                    |          | * file-like objects                              |
+|                    |          | * full path of the file                          |
++--------------------+----------+--------------------------------------------------+
+| variables_dict     | No       | A dictionary, used to render templated email     |
++--------------------+----------+--------------------------------------------------+
+| headers            | No       | A dictionary of extra headers on the message     |
++--------------------+----------+--------------------------------------------------+
+| scheduled_time     | No       | A date/datetime object indicating when the email |
+|                    |          | should be sent                                   |
++--------------------+----------+--------------------------------------------------+
+| priority           | No       | ``high``, ``medium``, ``low`` or ``now``         |
+|                    |          | (send_immediately)                               |
++--------------------+----------+--------------------------------------------------+
+| backend            | No       | Alias of the backend you want to use.            |
+|                    |          | ``default`` will be used if not specified.       |
++--------------------+----------+--------------------------------------------------+
+
+
+Here are a few examples.
+
+If you just want to send out emails without using database templates. You can
+call the ``send`` command without the ``template`` argument.
+
+.. code-block:: python
+
+    from django_mail_admin import mail
+
+    mail.send(
+        'from@example.com',
+        ['recipient1@example.com'],
+        subject='Welcome!',
+        message='Welcome home, {{ name }}!',
+        html_message='Welcome home, <b>{{ name }}</b>!',
+        headers={'Reply-to': 'reply@example.com'},
+        scheduled_time=date(2019, 1, 1),
+        variables_dict={'name': 'Alice'},
+    )
+
+``django_mail_admin`` is also task queue friendly. Passing ``now`` as priority into
+``send_mail`` will deliver the email right away (instead of queuing it),
+regardless of how many emails you have in your queue:
+
+.. code-block:: python
+
+    from django_mail_admin import mail, models
+
+    mail.send(
+        'from@example.com',
+        ['recipient1@example.com'],
+        template=models.EmailTemplate.objects.get(name='welcome'),
+        variables_dict={'foo': 'bar'},
+        priority='now',
+    )
+
+This is useful if you already use something like `django-rq <https://github.com/ui/django-rq>`_
+to send emails asynchronously and only need to store email related activities and logs.
+
+If you want to send an email with attachments:
+
+.. code-block:: python
+
+    from django.core.files.base import ContentFile
+     from django_mail_admin import mail, models
+
+    mail.send(
+        ['recipient1@example.com'],
+        'from@example.com',
+        template=models.EmailTemplate.objects.get(name='welcome'),
+        variables_dict={'foo': 'bar'},
+        priority='now',
+        attachments={
+            'attachment1.doc': '/path/to/file/file1.doc',
+            'attachment2.txt': ContentFile('file content'),
+            'attachment3.txt': { 'file': ContentFile('file content'), 'mimetype': 'text/plain'},
+        }
+    )
+
+send_many()
+-----------
+
+``send_many()`` is much more performant (generates less database queries) when
+sending a large number of emails. ``send_many()`` is almost identical to ``mail.send()``,
+with the exception that it accepts a list of keyword arguments that you'd
+usually pass into ``mail.send()``:
+
+.. code-block:: python
+
+    from from django_mail_admin import mail
+
+    first_email = {
+        'sender': 'from@example.com',
+        'recipients': ['alice@example.com'],
+        'subject': 'Hi!',
+        'message': 'Hi Alice!'
+    }
+    second_email = {
+        'sender': 'from@example.com',
+        'recipients': ['bob@example.com'],
+        'subject': 'Hi!',
+        'message': 'Hi Bob!'
+    }
+    kwargs_list = [first_email, second_email]
+
+    mail.send_many(kwargs_list)
+
+Attachments are not supported with ``mail.send_many()``.
 
 Management Commands
 -------------------
