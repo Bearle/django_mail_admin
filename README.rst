@@ -56,7 +56,7 @@ Add it to your `INSTALLED_APPS`:
 
 * Run ``migrate``::
 
-    python manage.py migrate
+    python manage.py migrate django_mail_admin
 
 * Set ``django_mail_admin.backends.CustomEmailBackend`` as your ``EMAIL_BACKEND`` in django's ``settings.py``::
 
@@ -69,6 +69,30 @@ Add it to your `INSTALLED_APPS`:
     * * * * * (cd $PROJECT; python manage.py get_new_mail >> $PROJECT/cron_mail_receive.log 2>&1)
     0 1 * * * (cd $PROJECT; python manage.py cleanup_mail --days=30 >> $PROJECT/cron_mail_cleanup.log 2>&1)
 
+.. note::
+
+   Once you have entered a mailbox to receive emails, you can easily verify that you
+   have properly configured your mailbox by either:
+
+   * From the Django Admin, using the 'Get New Mail' action from the action
+     dropdown on the Mailbox changelist
+   * *Or* from a shell opened to your project's directory, using the
+     ``get_new_mail`` management command by running::
+
+       python manage.py get_new_mail
+
+   If you have also configured the Outbox, you can verify that it is working, e.g. ::
+
+        from django_mail_admin import mail, models
+
+        mail.send(
+            'from@example.com',
+            'recipient@example.com', # List of email addresses also accepted
+            subject='My email',
+            message='Hi there!',
+            priority=models.PRIORITY.now,
+            html_message='Hi <strong>there</strong>!',
+        )
 
 Custom Email Backends
 ---------------------
