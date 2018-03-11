@@ -12,6 +12,8 @@ Django Mail Admin
     :target: https://codecov.io/gh/delneg/django_mail_admin
 
 The one and only django app to receive & send mail with templates and multiple configurations.
+
+
 Screenshots
 -----------
 
