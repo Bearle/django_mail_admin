@@ -49,3 +49,4 @@ tests/test.db
 messages/
 !/tests/messages/
 example/db.sqlite3
+mail_admin_attachments/

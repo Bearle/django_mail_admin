@@ -14,9 +14,9 @@ from django.forms.widgets import TextInput
 from .fields import CommaSeparatedEmailField
 from .forms import OutgoingEmailAdminForm
 from django.contrib import messages
+from django.utils.translation import ugettext_lazy as _
 
 logger = logging.getLogger(__name__)
-from django.utils.translation import ugettext_lazy as _
 
 # Admin row actions
 if 'django_admin_row_actions' in settings.INSTALLED_APPS:
@@ -306,10 +306,22 @@ class OutgoingEmailAdmin(admin.ModelAdmin):
 
     to_display.short_description = _('To')
 
+    def get_form(self, request, obj=None, **kwargs):
+        # Try to get active Outbox and prepopulate from_email field
+        form = super(OutgoingEmailAdmin, self).get_form(request, obj, **kwargs)
+        configurations = Outbox.objects.filter(active=True)
+        if not (len(configurations) > 1 or len(configurations) == 0):
+            form.base_fields['from_email'].initial = configurations.first().email_host_user
+        return form
+
     def save_model(self, request, obj, form, change):
         super(OutgoingEmailAdmin, self).save_model(request, obj, form, change)
+        # If we have an email to reply to, specify replied headers
         if form.cleaned_data['reply']:
-            obj.headers = form.cleaned_data['reply'].get_reply_headers(obj.headers)
+            if not obj.headers:
+                obj.headers = {}
+
+            obj.headers.update(form.cleaned_data['reply'].get_reply_headers(obj.headers))
             obj.save()
         # TODO: add setting to only queue emails after pressing a button/etc.
         obj.queue()
@@ -324,6 +336,10 @@ class OutboxAdmin(admin.ModelAdmin):
     list_filter = ('active',)
 
 
+class LogAdmin(admin.ModelAdmin):
+    list_display = ('email', 'status', 'date', 'message')
+
+
 if getattr(settings, 'DJANGO_MAILADMIN_ADMIN_ENABLED', True):
     admin.site.register(IncomingEmail, IncomingEmailAdmin)
     admin.site.register(IncomingAttachment, IncomingAttachmentAdmin)
@@ -333,3 +349,4 @@ if getattr(settings, 'DJANGO_MAILADMIN_ADMIN_ENABLED', True):
     admin.site.register(Attachment, AttachmentAdmin)
     admin.site.register(OutgoingEmail, OutgoingEmailAdmin)
     admin.site.register(Outbox, OutboxAdmin)
+    admin.site.register(Log, LogAdmin)

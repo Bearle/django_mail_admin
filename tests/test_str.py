@@ -23,4 +23,4 @@ class ModelsStrTest(TestCase):
         outbox = Outbox.objects.create(email_host_user='from', email_host='example.com', email_port='587')
         self.assertEqual(str(outbox), 'from@example.com:587')
         incoming_email = IncomingEmail.objects.create(mailbox=mailbox, subject='test')
-        self.assertEqual(str(incoming_email), 'test')
+        self.assertEqual(str(incoming_email), 'test from ')

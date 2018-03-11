@@ -299,7 +299,7 @@ class IncomingEmail(models.Model):
         return super(IncomingEmail, self).delete(*args, **kwargs)
 
     def __str__(self):
-        return self.subject
+        return self.subject + ' from ' + ','.join(self.from_address)
 
     class Meta:
         verbose_name = _('Incoming email')

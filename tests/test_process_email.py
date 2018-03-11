@@ -344,11 +344,6 @@ class TestProcessEmail(EmailMessageTestCase):
         self.assertEqual(replied.headers['In-Reply-To'], msg.message_id)
         self.assertEqual(replied.from_email, msg.to_addresses[0])
 
-        # create an email as if it was send as a reply re-using our reply msg
-        replied_email_obj = replied.email_message().message()
-        second_msg = mailbox.process_incoming_message(replied_email_obj)
-        self.assertEqual(second_msg.in_reply_to, replied)
-
     def test_message_with_text_attachment(self):
         email_object = self._get_email_object(
             'message_with_text_attachment.eml',

@@ -329,3 +329,13 @@ You can configure Django Mail Admin's logging from Django's settings.py. For exa
             },
         },
     }
+
+Django Admin integration
+------------------------
+
+Integration with Django Admin interface is provided.
+In there, you can send & receive emails, configure Outbox'es and Mailbox'es,
+ and if you've installed django-admin-row-actions you will have easy access to many features.
+The admin interface integration will only be enabled if **DJANGO_MAILADMIN_ADMIN_ENABLED** setting is set to True (default is True).
+
+
