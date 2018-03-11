@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-28 04:42-0600\n"
+"POT-Creation-Date: 2018-03-11 15:11-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,66 +16,80 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: django_mail_admin/admin.py:52 django_mail_admin/admin.py:222
+#: django_mail_admin/admin.py:53
+msgid "Got {} new letters for mailbox \"{}\""
+msgstr "Получено {} новых писем для ящика входяших сообщений \"{}\""
+
+#: django_mail_admin/admin.py:55
+msgid "No new mail for mailbox \"{}\""
+msgstr "Нет новых писем для ящика входяших сообщений \"{}\""
+
+#: django_mail_admin/admin.py:58 django_mail_admin/admin.py:238
 msgid "Get new mail"
 msgstr "Получить новую почту"
 
-#: django_mail_admin/admin.py:61
+#: django_mail_admin/admin.py:67
 msgid "Switch active status"
 msgstr "Переключить статус активно/неактивно"
 
-#: django_mail_admin/admin.py:89
+#: django_mail_admin/admin.py:95
 msgid "Re-send message received signal"
 msgstr "Отправить сигнал полученного письма заново"
 
-#: django_mail_admin/admin.py:99
+#: django_mail_admin/admin.py:105
 msgid "Mark as unread"
 msgstr "Пометить непрочитанным"
 
-#: django_mail_admin/admin.py:108
+#: django_mail_admin/admin.py:114
 msgid "Mark as read"
 msgstr "Пометить как прочитанное"
 
-#: django_mail_admin/admin.py:129
+#: django_mail_admin/admin.py:134
 msgid "Attachment count"
 msgstr "Кол-во вложений"
 
-#: django_mail_admin/admin.py:138
+#: django_mail_admin/admin.py:143
 #: django_mail_admin/models/configurations.py:451
-#: django_mail_admin/models/incoming.py:30
+#: django_mail_admin/models/incoming.py:32
 msgid "Mailbox"
 msgstr "Ящик входящих писем"
 
-#: django_mail_admin/admin.py:147
+#: django_mail_admin/admin.py:153
+#, fuzzy
+#| msgid "In reply to"
+msgid "Reply to"
+msgstr "В ответ на"
+
+#: django_mail_admin/admin.py:162
 msgid "From"
 msgstr "От кого"
 
-#: django_mail_admin/admin.py:175
+#: django_mail_admin/admin.py:191
 msgid "Mailbox name"
 msgstr "Название ящика входящих писем"
 
-#: django_mail_admin/admin.py:217 django_mail_admin/admin.py:219
+#: django_mail_admin/admin.py:233 django_mail_admin/admin.py:235
 msgid "View emails"
 msgstr "Посмотреть письма"
 
-#: django_mail_admin/admin.py:247 django_mail_admin/models/logs.py:19
-#: django_mail_admin/models/outgoing.py:57
+#: django_mail_admin/admin.py:263 django_mail_admin/models/logs.py:19
+#: django_mail_admin/models/outgoing.py:56
 msgid "Message"
 msgstr "Письмо"
 
-#: django_mail_admin/admin.py:253 django_mail_admin/models/outgoing.py:210
+#: django_mail_admin/admin.py:269 django_mail_admin/models/outgoing.py:206
 msgid "Attachment"
 msgstr "Вложение"
 
-#: django_mail_admin/admin.py:254 django_mail_admin/models/outgoing.py:211
+#: django_mail_admin/admin.py:270 django_mail_admin/models/outgoing.py:207
 msgid "Attachments"
 msgstr "Вложения"
 
-#: django_mail_admin/admin.py:276
+#: django_mail_admin/admin.py:292
 msgid "Requeue selected emails"
 msgstr "Поставить выбранные письма в очередь"
 
-#: django_mail_admin/admin.py:290
+#: django_mail_admin/admin.py:307
 msgid "To"
 msgstr "Кому"
 
@@ -91,36 +105,38 @@ msgstr "Email-fдреса через запятую"
 msgid "Only comma separated emails are allowed."
 msgstr "Разрешены только email адреса через запятую"
 
-#: django_mail_admin/models/configurations.py:35
-#: django_mail_admin/models/configurations.py:85
-#: django_mail_admin/models/outgoing.py:204
+#: django_mail_admin/models/configurations.py:38
+#: django_mail_admin/models/configurations.py:88
+#: django_mail_admin/models/outgoing.py:200
 msgid "Name"
 msgstr "Название"
 
-#: django_mail_admin/models/configurations.py:45
-#: django_mail_admin/models/configurations.py:125
+#: django_mail_admin/models/configurations.py:48
+#: django_mail_admin/models/configurations.py:128
 msgid "Active"
 msgstr "Активен"
 
-#: django_mail_admin/models/configurations.py:64
+#: django_mail_admin/models/configurations.py:67
 msgid ""
 "EMAIL_USE_TLS/EMAIL_USE_SSL are mutually exclusive, so only set one of those "
 "settings to True."
-msgstr "EMAIL_USE_TLS/EMAIL_USE_SSL взаимоисключающие настройки, поэтому ставьте только одну из них в положение True"
+msgstr ""
+"EMAIL_USE_TLS/EMAIL_USE_SSL взаимоисключающие настройки, поэтому ставьте "
+"только одну из них в положение True"
 
-#: django_mail_admin/models/configurations.py:72
+#: django_mail_admin/models/configurations.py:75
 msgid "Outbox"
 msgstr "Ящик исходящих писем"
 
-#: django_mail_admin/models/configurations.py:73
+#: django_mail_admin/models/configurations.py:76
 msgid "Outboxes"
 msgstr "Ящики исходящих писем"
 
-#: django_mail_admin/models/configurations.py:90
+#: django_mail_admin/models/configurations.py:93
 msgid "URI"
 msgstr "URI"
 
-#: django_mail_admin/models/configurations.py:93
+#: django_mail_admin/models/configurations.py:96
 msgid ""
 "Example: imap+ssl://myusername:mypassword@someserver <br /><br />Internet "
 "transports include 'imap' and 'pop3'; common local file transports include "
@@ -128,18 +144,18 @@ msgid ""
 ">Be sure to urlencode your username and password should they contain illegal "
 "characters (like @, :, etc)."
 msgstr ""
-"Пример: imap+ssl://myusername:mypassword@someserver <br /><br />Доступны такие"
-"интернет-транспорты как 'imap' и'pop3'; популярные файловые транспорты  - "
-"'maildir', 'mbox', реже 'babyl', 'mh', и 'mmdf'. <br /><br /"
-">Пожалуйта, закодируйте в urlencode ваши логин и пароль чтобы они не содержали недопустимых "
-"символов (как @, : и т.д.)"
+"Пример: imap+ssl://myusername:mypassword@someserver <br /><br />Доступны "
+"такиеинтернет-транспорты как 'imap' и'pop3'; популярные файловые транспорты  "
+"- 'maildir', 'mbox', реже 'babyl', 'mh', и 'mmdf'. <br /><br />Пожалуйта, "
+"закодируйте в urlencode ваши логин и пароль чтобы они не содержали "
+"недопустимых символов (как @, : и т.д.)"
 
-#: django_mail_admin/models/configurations.py:108
-#: django_mail_admin/models/outgoing.py:33
+#: django_mail_admin/models/configurations.py:111
+#: django_mail_admin/models/outgoing.py:32
 msgid "From email"
 msgstr "От кого"
 
-#: django_mail_admin/models/configurations.py:111
+#: django_mail_admin/models/configurations.py:114
 msgid ""
 "Example: MailBot &lt;mailbot@yourdomain.com&gt;<br />'From' header to set "
 "for outgoing email.<br /><br />If you do not use this e-mail inbox for "
@@ -148,7 +164,7 @@ msgid ""
 "`DEFAULT_FROM_EMAIL`."
 msgstr ""
 
-#: django_mail_admin/models/configurations.py:127
+#: django_mail_admin/models/configurations.py:130
 msgid ""
 "Check this e-mail inbox for new e-mail messages during polling cycles.  This "
 "checkbox does not have an effect upon whether mail is collected here when "
@@ -156,105 +172,107 @@ msgid ""
 "messages can be dispatched from this mailbox. "
 msgstr ""
 
-#: django_mail_admin/models/configurations.py:138
+#: django_mail_admin/models/configurations.py:141
 msgid "Last polling"
 msgstr "Обновлено"
 
-#: django_mail_admin/models/configurations.py:139
+#: django_mail_admin/models/configurations.py:142
 msgid ""
 "The time of last successful polling for messages.It is blank for new "
 "mailboxes and is not set for mailboxes that only receive messages via a pipe."
-msgstr "Время последнего успешного обновления ящика для писем. Это поле пусто для новых ящиков"
-"и не определено для тех ящиков, который получают письма через pipe"
+msgstr ""
+"Время последнего успешного обновления ящика для писем. Это поле пусто для "
+"новых ящикови не определено для тех ящиков, который получают письма через "
+"pipe"
 
 #: django_mail_admin/models/configurations.py:452
 msgid "Mailboxes"
 msgstr "Ящики входящих писем"
 
-#: django_mail_admin/models/incoming.py:35
-#: django_mail_admin/models/outgoing.py:53
+#: django_mail_admin/models/incoming.py:37
+#: django_mail_admin/models/outgoing.py:52
 #: django_mail_admin/models/templates.py:28
 msgid "Subject"
 msgstr "Тема"
 
-#: django_mail_admin/models/incoming.py:40
+#: django_mail_admin/models/incoming.py:42
 msgid "IncomingEmail ID"
 msgstr "IncomingEmail ID"
 
-#: django_mail_admin/models/incoming.py:49
+#: django_mail_admin/models/incoming.py:51
 msgid "In reply to"
 msgstr "В ответ на"
 
-#: django_mail_admin/models/incoming.py:54
+#: django_mail_admin/models/incoming.py:56
 msgid "From header"
 msgstr "Заголовки 'от'"
 
-#: django_mail_admin/models/incoming.py:59
+#: django_mail_admin/models/incoming.py:61
 msgid "To header"
 msgstr "Заколовки 'кому'"
 
-#: django_mail_admin/models/incoming.py:63
+#: django_mail_admin/models/incoming.py:65
 msgid "Body"
 msgstr "Тело письма"
 
-#: django_mail_admin/models/incoming.py:67
+#: django_mail_admin/models/incoming.py:69
 msgid "Encoded"
 msgstr "В закодированном виде"
 
-#: django_mail_admin/models/incoming.py:69
+#: django_mail_admin/models/incoming.py:71
 msgid "True if the e-mail body is Base64 encoded"
 msgstr "True если тело письма закодировано в Base64"
 
-#: django_mail_admin/models/incoming.py:73
+#: django_mail_admin/models/incoming.py:75
 msgid "Processed"
 msgstr "Обработано"
 
-#: django_mail_admin/models/incoming.py:78
+#: django_mail_admin/models/incoming.py:80
 msgid "Read"
 msgstr "Прочитано"
 
-#: django_mail_admin/models/incoming.py:85
+#: django_mail_admin/models/incoming.py:87
 msgid "Raw message contents"
 msgstr "Необработанное письмо"
 
-#: django_mail_admin/models/incoming.py:88
+#: django_mail_admin/models/incoming.py:90
 msgid "Original full content of message"
 msgstr "Изначальное полное содержание письма"
 
-#: django_mail_admin/models/incoming.py:301
+#: django_mail_admin/models/incoming.py:305
 msgid "Incoming email"
 msgstr "Входящее письмо"
 
-#: django_mail_admin/models/incoming.py:302
+#: django_mail_admin/models/incoming.py:306
 msgid "Incoming emails"
 msgstr "Входящие письма"
 
-#: django_mail_admin/models/incoming.py:311
+#: django_mail_admin/models/incoming.py:316
 msgid "IncomingEmail"
 msgstr "Письмо"
 
-#: django_mail_admin/models/incoming.py:315
-#: django_mail_admin/models/outgoing.py:68
+#: django_mail_admin/models/incoming.py:320
+#: django_mail_admin/models/outgoing.py:67
 msgid "Headers"
 msgstr "Заголовки"
 
-#: django_mail_admin/models/incoming.py:321
+#: django_mail_admin/models/incoming.py:326
 msgid "Document"
 msgstr "Документ"
 
-#: django_mail_admin/models/incoming.py:373
+#: django_mail_admin/models/incoming.py:378
 msgid "IncomingEmail attachment"
 msgstr "Вложение для входящего письма"
 
-#: django_mail_admin/models/incoming.py:374
+#: django_mail_admin/models/incoming.py:379
 msgid "IncomingEmail attachments"
 msgstr "Вложения для входящих писем"
 
-#: django_mail_admin/models/logs.py:12 django_mail_admin/models/outgoing.py:25
+#: django_mail_admin/models/logs.py:12 django_mail_admin/models/outgoing.py:24
 msgid "sent"
 msgstr "отправлено"
 
-#: django_mail_admin/models/logs.py:12 django_mail_admin/models/outgoing.py:25
+#: django_mail_admin/models/logs.py:12 django_mail_admin/models/outgoing.py:24
 msgid "failed"
 msgstr "ошибка"
 
@@ -262,7 +280,7 @@ msgstr "ошибка"
 msgid "Email address"
 msgstr "Email адрес"
 
-#: django_mail_admin/models/logs.py:17 django_mail_admin/models/outgoing.py:71
+#: django_mail_admin/models/logs.py:17 django_mail_admin/models/outgoing.py:70
 msgid "Status"
 msgstr "Статус"
 
@@ -278,91 +296,91 @@ msgstr "Лог"
 msgid "Logs"
 msgstr "Логи"
 
-#: django_mail_admin/models/outgoing.py:23
+#: django_mail_admin/models/outgoing.py:22
 msgid "low"
 msgstr "низкий"
 
-#: django_mail_admin/models/outgoing.py:23
+#: django_mail_admin/models/outgoing.py:22
 msgid "medium"
 msgstr "средний"
 
-#: django_mail_admin/models/outgoing.py:24
+#: django_mail_admin/models/outgoing.py:23
 msgid "high"
 msgstr "высокий"
 
-#: django_mail_admin/models/outgoing.py:24
+#: django_mail_admin/models/outgoing.py:23
 msgid "now"
 msgstr "сейчас"
 
-#: django_mail_admin/models/outgoing.py:26
+#: django_mail_admin/models/outgoing.py:25
 msgid "queued"
 msgstr "в очереди"
 
-#: django_mail_admin/models/outgoing.py:29
+#: django_mail_admin/models/outgoing.py:28
 msgid "Outgoing email"
 msgstr "Исходящее письмо"
 
-#: django_mail_admin/models/outgoing.py:30
+#: django_mail_admin/models/outgoing.py:29
 msgid "Outgoing emails"
 msgstr "Исходящие письма"
 
-#: django_mail_admin/models/outgoing.py:38
+#: django_mail_admin/models/outgoing.py:37
 msgid "To email(s)"
 msgstr "Кому"
 
-#: django_mail_admin/models/outgoing.py:39
+#: django_mail_admin/models/outgoing.py:38
 msgid "Cc"
 msgstr "Копия"
 
-#: django_mail_admin/models/outgoing.py:40
+#: django_mail_admin/models/outgoing.py:39
 msgid "Bcc"
 msgstr "Скрытая копия"
 
-#: django_mail_admin/models/outgoing.py:44
+#: django_mail_admin/models/outgoing.py:43
 msgid "Template"
 msgstr "Шаблон"
 
-#: django_mail_admin/models/outgoing.py:47
+#: django_mail_admin/models/outgoing.py:46
 msgid ""
 "If template is selected, HTML message and subject fields will not be used - "
 "they will be populated from template"
 msgstr ""
-"Если выбран шаблон, поля HTML текст и Тема не будут использованы -  "
-"они будут подставлены из шаблона"
+"Если выбран шаблон, поля HTML текст и Тема не будут использованы -  они "
+"будут подставлены из шаблона"
 
-#: django_mail_admin/models/outgoing.py:60
+#: django_mail_admin/models/outgoing.py:59
 msgid "HTML Message"
 msgstr "HTML текст"
 
-#: django_mail_admin/models/outgoing.py:62
+#: django_mail_admin/models/outgoing.py:61
 msgid "Used only if template is not selected"
 msgstr "Используется только если не выбран шаблон"
 
-#: django_mail_admin/models/outgoing.py:66
+#: django_mail_admin/models/outgoing.py:65
 msgid "The scheduled sending time"
 msgstr "Запланированное время отправки"
 
-#: django_mail_admin/models/outgoing.py:74
+#: django_mail_admin/models/outgoing.py:73
 msgid "Priority"
 msgstr "Приоритет"
 
-#: django_mail_admin/models/outgoing.py:79
+#: django_mail_admin/models/outgoing.py:78
 msgid "Send now"
 msgstr "Отправить сейчас"
 
-#: django_mail_admin/models/outgoing.py:83
+#: django_mail_admin/models/outgoing.py:82
 msgid "Backend alias"
 msgstr "Название бэкенда отправки"
 
-#: django_mail_admin/models/outgoing.py:203
+#: django_mail_admin/models/outgoing.py:199
 msgid "File"
 msgstr "Файл"
 
-#: django_mail_admin/models/outgoing.py:204
+#: django_mail_admin/models/outgoing.py:200
 msgid "The original filename"
 msgstr "Оригинальное имя файла"
 
-#: django_mail_admin/models/outgoing.py:206
+#: django_mail_admin/models/outgoing.py:202
 msgid "Email addresses"
 msgstr "Email адреса"
 
@@ -405,3 +423,11 @@ msgstr "Значение переменной"
 #: django_mail_admin/settings.py:56
 msgid "Available backends are: "
 msgstr "Доступные бэкенды отправки: "
+
+#: django_mail_admin/validators.py:20
+msgid "Error in email address name - more than one \"<\" or \">\" symbols"
+msgstr "Ошибка в названии email адрес - больше одного из символов \"<\" or \">\""
+
+#: django_mail_admin/validators.py:26
+msgid "Error in email address name - \">\" is before \"<\""
+msgstr "Ошибка в названии email адрес -  \">\" встречается раньше чем \"<\""
