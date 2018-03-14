@@ -5,8 +5,8 @@ Django Mail Admin
 .. image:: https://badge.fury.io/py/django_mail_admin.svg
     :target: https://badge.fury.io/py/django_mail_admin
 
-.. image:: https://travis-ci.org/delneg/django_mail_admin.svg?branch=master
-    :target: https://travis-ci.org/delneg/django_mail_admin
+.. image:: https://travis-ci.org/Bearle/django_mail_admin.svg?branch=master
+    :target: https://travis-ci.org/Bearle/django_mail_admin
 
 .. image:: https://codecov.io/gh/delneg/django_mail_admin/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/delneg/django_mail_admin
