@@ -3,6 +3,11 @@
 History
 -------
 
+0.1.3 (2018-06-02)
+++++++++++++++++++
+
+* Added additional params to cleanup_email command
+
 0.1.2 (2017-12-29)
 ++++++++++++++++++
 
