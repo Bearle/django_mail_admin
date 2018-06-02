@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.test.utils import override_settings
 from django.utils.timezone import now
 
-from django_mail_admin.models import OutgoingEmail, STATUS
+from django_mail_admin.models import OutgoingEmail, STATUS, Mailbox, IncomingEmail
 
 
 class CommandTest(TestCase):
@@ -14,19 +14,43 @@ class CommandTest(TestCase):
         The ``cleanup_mail`` command deletes mails older than a specified
         amount of days
         """
+        mailbox = Mailbox.objects.create(from_email='from@example.com', name='example.com')
+
         self.assertEqual(OutgoingEmail.objects.count(), 0)
+        self.assertEqual(IncomingEmail.objects.count(), 0)
 
         # The command shouldn't delete today's email
         email = OutgoingEmail.objects.create(from_email='from@example.com',
                                              to=['to@example.com'])
+
+        incoming_email = IncomingEmail.objects.create(mailbox=mailbox, subject='test')
+
         call_command('cleanup_email', days=30)
         self.assertEqual(OutgoingEmail.objects.count(), 1)
+        # The command shouldn't delete incoming emails by default
+        self.assertEqual(IncomingEmail.objects.count(), 1)
 
         # Email older than 30 days should be deleted
         email.created = now() - datetime.timedelta(31)
         email.save()
         call_command('cleanup_email', days=30)
         self.assertEqual(OutgoingEmail.objects.count(), 0)
+        # The incoming email should remain
+        self.assertEqual(IncomingEmail.objects.count(), 1)
+        email = OutgoingEmail.objects.create(from_email='from@example.com',
+                                             to=['to@example.com'])
+        # The command shouldn't delete today's incoming email
+        call_command('cleanup_email', days=30, outgoing=False, incoming=True)
+        # Outgoing email should remain
+        self.assertEqual(OutgoingEmail.objects.count(), 1)
+        self.assertEqual(IncomingEmail.objects.count(), 1)
+        incoming_email.processed = now() - datetime.timedelta(31)
+        incoming_email.save()
+        call_command('cleanup_email', days=30, outgoing=False, incoming=True)
+        # Incoming older than 30 days should be deleted
+        self.assertEqual(IncomingEmail.objects.count(), 0)
+        # Outgoing email should remain
+        self.assertEqual(OutgoingEmail.objects.count(), 1)
 
     TEST_SETTINGS = {
         'BACKENDS': {
