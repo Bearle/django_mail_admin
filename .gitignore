@@ -3,6 +3,7 @@ __pycache__
 
 # C extensions
 *.so
+*.lock
 
 # Packages
 *.egg

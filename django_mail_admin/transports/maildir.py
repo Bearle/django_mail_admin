@@ -1,4 +1,5 @@
 from mailbox import Maildir
+
 from django_mail_admin.transports.generic import GenericFileMailbox
 
 

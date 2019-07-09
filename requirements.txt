@@ -1,3 +1,4 @@
 jsonfield
 
 # Additional requirements go here
+social-auth-app-django

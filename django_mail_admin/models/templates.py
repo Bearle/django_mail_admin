@@ -1,7 +1,9 @@
 import logging
+
 from django.db import models
-from django.template import Template, Context
+from django.template import Template
 from django.utils.translation import ugettext_lazy as _
+
 from django_mail_admin.validators import validate_template_syntax
 
 logger = logging.getLogger(__name__)
