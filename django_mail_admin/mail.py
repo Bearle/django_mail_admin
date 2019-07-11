@@ -7,12 +7,12 @@ from django.db.models import Q
 from django.utils.timezone import now
 
 from .connections import connections
+from .logutils import setup_loghandlers
 from .models import OutgoingEmail, Log, PRIORITY, STATUS, create_attachments, TemplateVariable
 from .settings import (get_available_backends, get_batch_size,
                        get_log_level, get_sending_order, get_threads_per_process)
 from .utils import (parse_emails, parse_priority,
                     split_emails)
-from .logutils import setup_loghandlers
 
 logger = setup_loghandlers("INFO")
 

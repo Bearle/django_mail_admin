@@ -1,8 +1,8 @@
 import warnings
 
 from django.conf import settings
-from django.core.cache.backends.base import InvalidCacheBackendError
 from django.core.cache import caches
+from django.core.cache.backends.base import InvalidCacheBackendError
 from django.utils.translation import ugettext_lazy as _
 
 

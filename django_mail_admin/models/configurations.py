@@ -1,26 +1,18 @@
 import gzip
-from email.encoders import encode_base64
-from email.message import Message as EmailMessage
-from email.utils import formatdate, parseaddr
-from quopri import encode as encode_quopri
-import base64
-import email
 import logging
 import mimetypes
 import os.path
-import sys
 import uuid
+from email.message import Message as EmailMessage
+from io import BytesIO
 from tempfile import NamedTemporaryFile
 from urllib.parse import parse_qs, unquote, urlparse
-from io import BytesIO
-import django
-from django.conf import settings as django_settings
-from django.core.files.base import ContentFile, File
-from django.core.mail.message import make_msgid
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.utils.timezone import now
+
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile, File
+from django.db import models
+from django.utils.timezone import now
+from django.utils.translation import ugettext_lazy as _
 
 from django_mail_admin import utils
 from django_mail_admin.settings import get_allowed_mimetypes, strip_unallowed_mimetypes, \
