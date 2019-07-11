@@ -3,6 +3,11 @@
 History
 -------
 
+0.1.4 (2019-06-11)
+++++++++++++++++++
+
+* Create migrations & reformat code by @cedricfarinazzo
+
 0.1.3 (2018-06-02)
 ++++++++++++++++++
 
