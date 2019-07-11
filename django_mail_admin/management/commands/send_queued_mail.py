@@ -1,5 +1,5 @@
-import tempfile
 import sys
+import tempfile
 
 from django.core.management.base import BaseCommand
 from django.db import connection
@@ -7,10 +7,9 @@ from django.db.models import Q
 from django.utils.timezone import now
 
 from django_mail_admin.lockfile import FileLock, FileLocked
+from django_mail_admin.logutils import setup_loghandlers
 from django_mail_admin.mail import send_queued
 from django_mail_admin.models import OutgoingEmail, STATUS
-from django_mail_admin.logutils import setup_loghandlers
-
 
 logger = setup_loghandlers()
 default_lockfile = tempfile.gettempdir() + "/django_mail_admin"
@@ -54,7 +53,7 @@ class Command(BaseCommand):
                     connection.close()
 
                     if not OutgoingEmail.objects.filter(status=STATUS.queued) \
-                            .filter(Q(scheduled_time__lte=now()) | Q(scheduled_time=None)).exists():
+                        .filter(Q(scheduled_time__lte=now()) | Q(scheduled_time=None)).exists():
                         break
         except FileLocked:
             logger.info('Failed to acquire lock, terminating now.')

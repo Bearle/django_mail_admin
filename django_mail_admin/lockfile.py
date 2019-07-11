@@ -97,7 +97,7 @@ class FileLock(object):
             if self.valid_lock():
                 intervals -= 1
                 time.sleep(interval)
-                #print('stopping %s' % intervals)
+                # print('stopping %s' % intervals)
             else:
                 return True
 
@@ -124,7 +124,6 @@ class FileLock(object):
         else:
             # Windows platforms doesn't support symlinks, at least not through the os API
             self.lock_filename = self.pid_filename
-
 
     def release(self):
         """Try to delete the lock files. Doesn't matter if we fail"""

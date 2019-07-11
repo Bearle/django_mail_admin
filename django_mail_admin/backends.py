@@ -1,6 +1,8 @@
-from django.core.mail.backends.smtp import EmailBackend
-from .models import Outbox
 import threading
+
+from django.core.mail.backends.smtp import EmailBackend
+
+from .models import Outbox
 
 
 class CustomEmailBackend(EmailBackend):

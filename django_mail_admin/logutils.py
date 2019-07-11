@@ -1,5 +1,5 @@
-from logging.config import dictConfig
 import logging
+from logging.config import dictConfig
 
 
 # Taken from https://github.com/nvie/rq/blob/master/rq/logutils.py

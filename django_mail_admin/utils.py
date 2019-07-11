@@ -3,10 +3,11 @@ import email.header
 import logging
 import os
 from collections import namedtuple
-from django_mail_admin.settings import get_default_priority, get_default_charset, get_attachment_upload_to
-from django.conf import settings
-from .validators import validate_email_with_name
+
 from django.core.exceptions import ValidationError
+
+from django_mail_admin.settings import get_default_priority, get_default_charset, get_attachment_upload_to
+from .validators import validate_email_with_name
 
 logger = logging.getLogger(__name__)
 

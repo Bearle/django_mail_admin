@@ -2,19 +2,19 @@ import logging
 
 from django.conf import settings
 from django.contrib import admin
+from django.contrib import messages
+from django.forms.widgets import TextInput
+from django.shortcuts import reverse
+from django.utils import timezone
+from django.utils.safestring import mark_safe
+from django.utils.translation import ugettext_lazy as _
 
 from django_mail_admin.models import Mailbox, IncomingAttachment, IncomingEmail, TemplateVariable, OutgoingEmail, \
     Outbox, EmailTemplate, STATUS, Log, Attachment
-from django.shortcuts import reverse
-from django_mail_admin.utils import convert_header_to_unicode
-from django.utils.safestring import mark_safe
 from django_mail_admin.signals import message_received
-from django.utils import timezone
-from django.forms.widgets import TextInput
+from django_mail_admin.utils import convert_header_to_unicode
 from .fields import CommaSeparatedEmailField
 from .forms import OutgoingEmailAdminForm
-from django.contrib import messages
-from django.utils.translation import ugettext_lazy as _
 
 logger = logging.getLogger(__name__)
 
@@ -257,7 +257,7 @@ class TemplateVariableInline(admin.TabularInline):
 
 def get_message_preview(instance):
     return ('{0}...'.format(instance.message[:25]) if len(instance.message) > 25
-    else instance.message)
+            else instance.message)
 
 
 get_message_preview.short_description = _('Message')
