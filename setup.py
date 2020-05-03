@@ -41,6 +41,19 @@ if sys.argv[-1] == 'tag':
     os.system("git push --tags")
     sys.exit()
 
+def parse_requirements(filename):
+    reqs = []
+    with open(filename, 'r') as handler:
+        data = handler.readlines()
+    for e in data:
+        if e.startswith('#'):
+            continue
+        if len(e.strip()) == 0:
+            continue
+        reqs.append(e.strip())
+    print(reqs)
+    return reqs
+
 readme = open('README.rst').read()
 history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
@@ -56,7 +69,7 @@ setup(
         'django_mail_admin',
     ],
     include_package_data=True,
-    install_requires=[],
+    install_requires=parse_requirements('requirements.txt'),
     license="MIT",
     zip_safe=False,
     keywords='django_mail_admin',
