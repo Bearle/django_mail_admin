@@ -51,7 +51,6 @@ def parse_requirements(filename):
         if len(e.strip()) == 0:
             continue
         reqs.append(e.strip())
-    print(reqs)
     return reqs
 
 readme = open('README.rst').read()
