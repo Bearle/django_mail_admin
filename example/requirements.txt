@@ -4,4 +4,4 @@
 # Your app in editable mode.
 -e ../
 django_admin_row_actions>=0.0.4
-Django==2.2.12
+Django==2.2.13
