@@ -143,7 +143,7 @@ Optional requirements
 ---------------------
 
 1. `django_admin_row_actions` for some useful actions in the admin interface
-2. `requests` & social_django for Gmail
+2. `requests` & `social-auth-app-django` for Gmail
 
 
 FAQ
