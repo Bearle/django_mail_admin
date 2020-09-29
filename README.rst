@@ -25,6 +25,7 @@ Features
 
 * Everything django-mailbox has
 * Everything django-post-office has
+* Everything django-db-email-backend has
 * Database configurations - activate an outbox to send from, activate a mailbox to receive from
 * Templates
 * Translatable
@@ -136,8 +137,23 @@ You can then choose what backend you want to use when sending mail:
         backend='ses',
     )
 
+Capture outgoing emails into Outbox
+-----------------------------------
 
+If you want to store outgoing emails in the Outbox before they are submitted
+to the backend, set ``django_mail_admin.backends.OutboxEmailBackend`` as your
+``EMAIL_BACKEND`` in django's ``settings.py``::
 
+    EMAIL_BACKEND='django_mail_admin.backends.OutboxEmailBackend'
+
+Emails submitted using ``django.core.mail.send_mail`` will be stored in
+the Outbox with the default backend selected for use when sending.
+
+The emails will remain in the Outbox until ``send_queued_mail`` is run.
+
+This can be used on development and test environments to capture emails
+so they are not sent automatically, and can be reviewed in Django Admin
+to ensure the contents are correct.
 
 Optional requirements
 ---------------------
