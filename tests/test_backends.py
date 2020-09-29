@@ -1,10 +1,11 @@
+from django.core.mail import send_mail 
 from django.core.mail.backends.base import BaseEmailBackend
 from django.test import TestCase
 from django.test.utils import override_settings
 from django_mail_admin.mail import send
 from django_mail_admin.settings import get_backend
 from django_mail_admin.backends import CustomEmailBackend
-from django_mail_admin.models import Outbox
+from django_mail_admin.models import Outbox, OutgoingEmail
 
 
 class ErrorRaisingBackend(BaseEmailBackend):
@@ -42,3 +43,14 @@ class BackendTest(TestCase):
         outbox.delete()
         with self.assertRaises(ValueError):
             backend2 = CustomEmailBackend()
+
+    @override_settings(DJANGO_MAIL_ADMIN={}, EMAIL_BACKEND='django_mail_admin.backends.OutboxEmailBackend')
+    def test_outbox_email_backend(self):
+        count_before = len(OutgoingEmail.objects.all())
+        sent_count = send_mail(
+            subject='Test subject', message='message.', 
+            from_email='from@example.com', recipient_list=['to@example.com'], 
+            fail_silently=False)
+        self.assertEqual(sent_count, 1)
+        count_after = len(OutgoingEmail.objects.all())
+        self.assertEqual(count_after, count_before + 1)
