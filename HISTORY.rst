@@ -2,6 +2,11 @@
 
 History
 -------
+0.2.2 (2020-10-19)
+++++++++++++++++++
+
+* Merge PR with email_queued signal: fired when OutgoindEmail is placed to queue
+
 0.2.1 (2020-09-29)
 ++++++++++++++++++
 
