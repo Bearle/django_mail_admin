@@ -11,7 +11,7 @@ from jsonfield import JSONField
 from django_mail_admin.connections import connections
 from django_mail_admin.fields import CommaSeparatedEmailField
 from django_mail_admin.settings import get_log_level, get_backend_names_str
-from django_mail_admin.signals import email_sent, email_failed_to_send
+from django_mail_admin.signals import email_sent, email_failed_to_send, email_queued
 from django_mail_admin.utils import get_attachment_save_path, PRIORITY, STATUS
 from django_mail_admin.validators import validate_email_with_name
 from .templates import EmailTemplate
@@ -272,4 +272,7 @@ def send_mail(subject, message, from_email, recipient_list, html_message='',
     if priority == PRIORITY.now:
         for email in emails:
             email.dispatch()
+    else:
+        for email in emails:
+            email_queued.send(email)
     return emails
