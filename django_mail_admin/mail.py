@@ -11,6 +11,7 @@ from .logutils import setup_loghandlers
 from .models import OutgoingEmail, Log, PRIORITY, STATUS, create_attachments, TemplateVariable
 from .settings import (get_available_backends, get_batch_size,
                        get_log_level, get_sending_order, get_threads_per_process)
+from .signals import email_queued
 from .utils import (parse_emails, parse_priority,
                     split_emails)
 
@@ -122,6 +123,8 @@ def send(sender, recipients=None, template=None, subject='',
 
     if priority == PRIORITY.now:
         email.dispatch(log_level=log_level)
+    else:
+        email_queued.send(email)
 
     return email
 
