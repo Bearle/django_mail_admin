@@ -292,8 +292,22 @@ def requeue(modeladmin, request, queryset):
 requeue.short_description = _('Requeue selected emails')
 
 
+class LogInline(admin.TabularInline):
+    model = Log
+    can_delete = False
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by('date')
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+
 class OutgoingEmailAdmin(admin.ModelAdmin):
-    inlines = (TemplateVariableInline, AttachmentInline)
+    inlines = (TemplateVariableInline, AttachmentInline, LogInline)
     list_display = ['id', 'to_display', 'subject', 'template', 'from_email', 'status', 'scheduled_time', 'priority']
     formfield_overrides = {
         CommaSeparatedEmailField: {'widget': CommaSeparatedEmailWidget}
