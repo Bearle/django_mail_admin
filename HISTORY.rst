@@ -2,6 +2,12 @@
 
 History
 -------
+
+0.2.3 (2021-03-12)
+++++++++++++++++++
+
+* Merge PR - Added logs inline to the OutgoingEmailAdmin #20
+
 0.2.2 (2020-10-19)
 ++++++++++++++++++
 
