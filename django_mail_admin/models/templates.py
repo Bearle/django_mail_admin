@@ -43,6 +43,10 @@ class EmailTemplate(models.Model):
         template = Template(self.email_html_text)
         return template.render(context)
 
+    def render_subject(self, context):
+        template = Template(self.subject)
+        return template.render(context)
+
     def __str__(self):
         return self.name
 
