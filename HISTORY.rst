@@ -4,6 +4,10 @@
 
 History
 -------
+0.2.5 (2021-11-01)
+++++++++++++++++++
+
+* Fix bug from PR, make social-auth app optional #26
 
 0.2.4 (2021-11-01)
 ++++++++++++++++++
