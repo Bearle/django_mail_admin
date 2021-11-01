@@ -1,7 +1,14 @@
 .. :changelog:
 
+
+
 History
 -------
+
+0.2.4 (2021-11-01)
+++++++++++++++++++
+
+* Merge PR - Added EmailTemplate.render_subject() method #27
 
 0.2.3 (2021-03-12)
 ++++++++++++++++++
