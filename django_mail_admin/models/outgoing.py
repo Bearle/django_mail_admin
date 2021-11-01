@@ -112,7 +112,7 @@ class OutgoingEmail(models.Model):
         message = self.message
         if self.template is not None:
             _context = self._get_context()
-            subject = self.tempate.render_subject(_context)
+            subject = self.template.render_subject(_context)
             html_message = self.template.render_html_text(_context)
         else:
             subject = self.subject
