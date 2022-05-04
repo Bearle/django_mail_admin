@@ -1,8 +1,8 @@
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.template import Template, TemplateSyntaxError, TemplateDoesNotExist
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 
 
 def validate_email_with_name(value):
@@ -11,7 +11,7 @@ def validate_email_with_name(value):
 
     Both "Recipient Name <email@example.com>" and "email@example.com" are valid.
     """
-    value = force_text(value)
+    value = force_str(value)
 
     if '<' and '>' in value:
         lesses = value.count('<')

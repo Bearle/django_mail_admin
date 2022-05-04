@@ -9,7 +9,7 @@ from django_mail_admin.models import Mailbox, IncomingEmail, PRIORITY
 from django_mail_admin.utils import convert_header_to_unicode
 from django_mail_admin import utils
 from .test_mailbox_base import EmailMessageTestCase
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.core.mail import EmailMessage
 from django_mail_admin.settings import get_config
 
@@ -357,12 +357,12 @@ class TestProcessEmail(EmailMessageTestCase):
         email_object = self._get_email_object(
             'message_with_long_content.eml',
         )
-        size = len(force_text(email_object.as_string()))
+        size = len(force_str(email_object.as_string()))
 
         msg = self.mailbox.process_incoming_message(email_object)
 
         self.assertEqual(size,
-                         len(force_text(msg.get_email_object().as_string())))
+                         len(force_str(msg.get_email_object().as_string())))
 
     def test_message_saved(self):
         message = self._get_email_object('generic_message.eml')
