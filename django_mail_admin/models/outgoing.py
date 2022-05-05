@@ -4,8 +4,8 @@ from django.core.files import File
 from django.core.mail import EmailMessage, EmailMultiAlternatives
 from django.db import models
 from django.template import Template, Context
-from django.utils.encoding import force_text
-from django.utils.translation import ugettext_lazy as _
+from django.utils.encoding import force_str
+from django.utils.translation import gettext_lazy as _
 from jsonfield import JSONField
 
 from django_mail_admin.connections import connections
@@ -258,7 +258,7 @@ def send_mail(subject, message, from_email, recipient_list, html_message='',
     ``send_mail`` core email method.
     """
 
-    subject = force_text(subject)
+    subject = force_str(subject)
     status = None if priority == PRIORITY.now else STATUS.queued
     emails = []
     for address in recipient_list:
