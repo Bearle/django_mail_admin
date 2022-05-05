@@ -10,7 +10,7 @@ from quopri import encode as encode_quopri
 from django.core.exceptions import ValidationError
 from django.core.mail.message import make_msgid
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from django_mail_admin.models import Mailbox, OutgoingEmail
 from django_mail_admin.settings import get_attachment_interpolation_header, get_altered_message_header

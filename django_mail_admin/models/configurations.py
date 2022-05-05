@@ -12,7 +12,7 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile, File
 from django.db import models
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from django_mail_admin import utils
 from django_mail_admin.settings import get_allowed_mimetypes, strip_unallowed_mimetypes, \

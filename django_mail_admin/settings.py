@@ -3,7 +3,7 @@ import warnings
 from django.conf import settings
 from django.core.cache import caches
 from django.core.cache.backends.base import InvalidCacheBackendError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 
 def get_cache(name):
