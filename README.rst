@@ -40,7 +40,7 @@ Dependencies
 Documentation
 -------------
 
-The full documentation is at https://django_mail_admin.readthedocs.io.
+The full documentation is at https://django-mail-admin.readthedocs.io.
 
 Quickstart
 ----------
