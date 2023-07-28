@@ -298,13 +298,13 @@ class CommaSeparatedEmailWidget(TextInput):
         super(CommaSeparatedEmailWidget, self).__init__(*args, **kwargs)
         self.attrs.update({'class': 'vTextField'})
 
-    def _format_value(self, value):
+    def format_value(self, value):
         # If the value is a string wrap it in a list so it does not get sliced.
         if not value:
             return ''
         if isinstance(value, str):
             value = [value, ]
-        return ','.join([item for item in value])
+        return ', '.join([item for item in value])
 
 
 def requeue(modeladmin, request, queryset):
