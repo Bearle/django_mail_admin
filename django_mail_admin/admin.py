@@ -4,7 +4,9 @@ from django.conf import settings
 from django.contrib import admin
 from django.contrib import messages
 from django.forms.widgets import TextInput
+from django.http import HttpResponse
 from django.shortcuts import reverse
+from django.template import Context
 from django.utils import timezone
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
@@ -248,6 +250,27 @@ if admin_row_actions:
 
 class EmailTemplateAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'subject')
+    readonly_fields = ['preview_template_field']
+
+    def preview_template_field(self, o):
+        if o.id:
+            url = reverse('admin:django_mail_admin_emailtemplate_change', kwargs={'object_id': o.pk})
+            url = url + '?preview_template=true'
+            return mark_safe(f'<a href="{url}" target="_blank">Preview this template</a>')
+        else:
+            return '---'
+    preview_template_field.short_description='Preview'
+
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        if request.GET.get('preview_template', '').lower()=='true':
+            return self.preview_template_view(request, object_id)
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def preview_template_view(self, request, object_id):
+        obj = self.get_object(request, object_id)
+        content = obj.render_html_text(Context())
+        return HttpResponse(content, content_type='text/html')
+
 
 
 class TemplateVariableInline(admin.TabularInline):
@@ -275,13 +298,13 @@ class CommaSeparatedEmailWidget(TextInput):
         super(CommaSeparatedEmailWidget, self).__init__(*args, **kwargs)
         self.attrs.update({'class': 'vTextField'})
 
-    def _format_value(self, value):
+    def format_value(self, value):
         # If the value is a string wrap it in a list so it does not get sliced.
         if not value:
             return ''
         if isinstance(value, str):
             value = [value, ]
-        return ','.join([item for item in value])
+        return ', '.join([item for item in value])
 
 
 def requeue(modeladmin, request, queryset):
