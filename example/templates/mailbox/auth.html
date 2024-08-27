@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% extends "mailbox/base.html" %}
+
+{% block title %}Example - Mailbox: Listings{% endblock %}
+
+{% block site_head %}Example - Mailboxes {% endblock %}
+
+{% block content %}
+
+<H2>Mailbox Auth</H2>
+{% if result %}
+Authorization  {% if result == True %} completed <b>successfully</b> {% else %} attempt <b>failed </b> '{{ message }}'' {% endif %} for Mailbox {{  mbx.id }}, with URI {{ mbx.uri }}
+{% else %}
+    <p>Authorization results not yet available for Mailbox {{ mbx.id }}.</p>
+{% endif %}
+<!--
+    <p><a target="_blank" href="{ url 'django_mail_admin.admin' }">Create new mailbox here...</a></p>
+-->
+{% endblock %}

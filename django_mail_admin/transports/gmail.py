@@ -27,30 +27,29 @@ class GmailImapTransport(ImapTransport):
             )
         except ImportError:
             raise ValueError(
-                '''Install python-social-auth/social-app-django to use oauth2 auth for gmail 
-                (pip install social-auth-app-django)'''
+                """Install python-social-auth/social-app-django to use oauth2 auth for gmail
+                (pip install social-auth-app-django)"""
             )
 
         access_token = None
+        google_email_address = None
         while access_token is None:
             try:
                 access_token = get_google_access_token(username)
-                google_email_address = fetch_user_info(username)['email']
+                google_email_address = fetch_user_info(username)["email"]
             except TypeError:
                 # This means that the google process took too long
                 # Trying again is the right thing to do
                 pass
             except AccessTokenNotFound:
                 raise ValueError(
-                    "No Token available in python-social-auth for %s" % (
-                        username
-                    )
+                    "No Token available in python-social-auth for %s" % (username)
                 )
 
-        auth_string = 'user=%s\1auth=Bearer %s\1\1' % (
+        auth_string = "user=%s\1auth=Bearer %s\1\1" % (
             google_email_address,
-            access_token
+            access_token,
         )
-        self.server = self.transport(self.hostname, self.port)
-        self.server.authenticate('XOAUTH2', lambda x: auth_string)
+        self.server = self.transport("imap.gmail.com", self.port)
+        self.server.authenticate("XOAUTH2", lambda x: auth_string)
         self.server.select()

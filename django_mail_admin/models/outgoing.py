@@ -20,10 +20,17 @@ logger = logging.getLogger(__name__)
 
 
 class OutgoingEmail(models.Model):
-    PRIORITY_CHOICES = [(PRIORITY.low, _("low")), (PRIORITY.medium, _("medium")),
-                        (PRIORITY.high, _("high")), (PRIORITY.now, _("now"))]
-    STATUS_CHOICES = [(STATUS.sent, _("sent")), (STATUS.failed, _("failed")),
-                      (STATUS.queued, _("queued"))]
+    PRIORITY_CHOICES = [
+        (PRIORITY.low, _("low")),
+        (PRIORITY.medium, _("medium")),
+        (PRIORITY.high, _("high")),
+        (PRIORITY.now, _("now")),
+    ]
+    STATUS_CHOICES = [
+        (STATUS.sent, _("sent")),
+        (STATUS.failed, _("failed")),
+        (STATUS.queued, _("queued")),
+    ]
 
     class Meta:
         verbose_name = _("Outgoing email")
@@ -32,7 +39,7 @@ class OutgoingEmail(models.Model):
     from_email = models.CharField(
         verbose_name=_("From email"),
         max_length=254,
-        validators=[validate_email_with_name]
+        validators=[validate_email_with_name],
     )
 
     to = CommaSeparatedEmailField(_("To email(s)"))
@@ -44,45 +51,44 @@ class OutgoingEmail(models.Model):
         verbose_name=_("Template"),
         null=True,
         blank=True,
-        help_text=_("If template is selected, HTML message and "
-                    "subject fields will not be used - they will be populated from template"),
-        on_delete=models.CASCADE
+        help_text=_(
+            "If template is selected, HTML message and "
+            "subject fields will not be used - they will be populated from template"
+        ),
+        on_delete=models.CASCADE,
     )
 
-    subject = models.CharField(
-        verbose_name=_("Subject"),
-        max_length=989,
-        blank=True
-    )
+    subject = models.CharField(verbose_name=_("Subject"), max_length=989, blank=True)
     message = models.TextField(_("Message"), blank=True)
 
     html_message = models.TextField(
         verbose_name=_("HTML Message"),
         blank=True,
-        help_text=_("Used only if template is not selected")
+        help_text=_("Used only if template is not selected"),
     )
     created = models.DateTimeField(auto_now_add=True, db_index=True)
     last_updated = models.DateTimeField(db_index=True, auto_now=True)
-    scheduled_time = models.DateTimeField(_('The scheduled sending time'),
-                                          blank=True, null=True, db_index=True)
-    headers = JSONField(_('Headers'), blank=True, null=True)
+    scheduled_time = models.DateTimeField(
+        _("The scheduled sending time"), blank=True, null=True, db_index=True
+    )
+    headers = JSONField(_("Headers"), blank=True, null=True)
 
     status = models.PositiveSmallIntegerField(
-        _("Status"),
-        choices=STATUS_CHOICES, db_index=True,
-        blank=True, null=True)
-    priority = models.PositiveSmallIntegerField(_("Priority"),
-                                                choices=PRIORITY_CHOICES,
-                                                blank=True, null=True)
-
-    send_now = models.BooleanField(
-        verbose_name=_("Send now"),
-        default=False
+        _("Status"), choices=STATUS_CHOICES, db_index=True, blank=True, null=True
+    )
+    priority = models.PositiveSmallIntegerField(
+        _("Priority"), choices=PRIORITY_CHOICES, blank=True, null=True
     )
 
-    backend_alias = models.CharField(_('Backend alias'), blank=True, default='',
-                                     help_text=get_backend_names_str,
-                                     max_length=64)
+    send_now = models.BooleanField(verbose_name=_("Send now"), default=False)
+
+    backend_alias = models.CharField(
+        _("Backend alias"),
+        blank=True,
+        default="",
+        help_text=get_backend_names_str,
+        max_length=64,
+    )
 
     def __init__(self, *args, **kwargs):
         super(OutgoingEmail, self).__init__(*args, **kwargs)
@@ -118,22 +124,38 @@ class OutgoingEmail(models.Model):
             subject = self.subject
             html_message = self.html_message
 
-        connection = connections[self.backend_alias or 'default']
+        connection = connections[self.backend_alias or "default"]
 
         if html_message:
             msg = EmailMultiAlternatives(
-                subject=subject, body=message, from_email=self.from_email,
-                to=self.to, bcc=self.bcc, cc=self.cc,
-                headers=self.headers, connection=connection)
+                subject=subject,
+                body=message,
+                from_email=self.from_email,
+                to=self.to,
+                bcc=self.bcc,
+                cc=self.cc,
+                headers=self.headers,
+                connection=connection,
+            )
             msg.attach_alternative(html_message, "text/html")
         else:
             msg = EmailMessage(
-                subject=subject, body=message, from_email=self.from_email,
-                to=self.to, bcc=self.bcc, cc=self.cc,
-                headers=self.headers, connection=connection)
+                subject=subject,
+                body=message,
+                from_email=self.from_email,
+                to=self.to,
+                bcc=self.bcc,
+                cc=self.cc,
+                headers=self.headers,
+                connection=connection,
+            )
 
         for attachment in self.attachments.all():
-            msg.attach(attachment.name, attachment.file.read(), mimetype=attachment.mimetype or None)
+            msg.attach(
+                attachment.name,
+                attachment.file.read(),
+                mimetype=attachment.mimetype or None,
+            )
             attachment.file.close()
 
         self._cached_email_message = msg
@@ -143,19 +165,35 @@ class OutgoingEmail(models.Model):
         self.status = STATUS.queued
         self.save()
 
+    def _update_message_id(self) -> bool:
+        """update internet message id if found in cached-email-message"""
+        retval = False
+        if not self._cached_email_message:
+            return retval
+        internet_message_id = self._cached_email_message.extra_headers.get(
+            "Message-ID", None
+        )
+        if internet_message_id:
+            if not self.headers:
+                self.headers = {}
+            self.headers.update({"Message-ID": internet_message_id})
+            self.save(update_fields=["headers"])
+            retval = True
+        return retval
+
     def dispatch(self, log_level=None, commit=True):
         """
         Sends email and log the result.
         """
-
         email_message = None
         # Priority is handled in mail.send
         try:
             email_message = self.email_message()
             email_message.send()
             status = STATUS.sent
-            message = ''
-            exception_type = ''
+            self._update_message_id()
+            message = ""
+            exception_type = ""
             email_sent.send(sender=self, outgoing_email=email_message)
         except Exception as e:
             status = STATUS.failed
@@ -170,7 +208,7 @@ class OutgoingEmail(models.Model):
 
         if commit:
             self.status = status
-            self.save(update_fields=['status'])
+            self.save(update_fields=["status"])
 
             if log_level is None:
                 log_level = get_log_level()
@@ -179,11 +217,13 @@ class OutgoingEmail(models.Model):
             # and 2 means log both successes and failures
             if log_level == 1:
                 if status == STATUS.failed:
-                    self.logs.create(status=status, message=message,
-                                     exception_type=exception_type)
+                    self.logs.create(
+                        status=status, message=message, exception_type=exception_type
+                    )
             elif log_level == 2:
-                self.logs.create(status=status, message=message,
-                                 exception_type=exception_type)
+                self.logs.create(
+                    status=status, message=message, exception_type=exception_type
+                )
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -197,11 +237,18 @@ class Attachment(models.Model):
     """
     A model describing an email attachment.
     """
-    file = models.FileField(_('File'), upload_to=get_attachment_save_path)
-    name = models.CharField(_('Name'), max_length=255, help_text=_("The original filename"))
-    emails = models.ManyToManyField(OutgoingEmail, related_name='attachments', blank=True,
-                                    verbose_name=_('Email addresses'))
-    mimetype = models.CharField(max_length=255, default='', blank=True)
+
+    file = models.FileField(_("File"), upload_to=get_attachment_save_path)
+    name = models.CharField(
+        _("Name"), max_length=255, help_text=_("The original filename")
+    )
+    emails = models.ManyToManyField(
+        OutgoingEmail,
+        related_name="attachments",
+        blank=True,
+        verbose_name=_("Email addresses"),
+    )
+    mimetype = models.CharField(max_length=255, default="", blank=True)
 
     class Meta:
         verbose_name = _("Attachment")
@@ -225,8 +272,8 @@ def create_attachments(attachment_files):
     for filename, filedata in attachment_files.items():
 
         if isinstance(filedata, dict):
-            content = filedata.get('file', None)
-            mimetype = filedata.get('mimetype', None)
+            content = filedata.get("file", None)
+            mimetype = filedata.get("mimetype", None)
         else:
             content = filedata
             mimetype = None
@@ -235,7 +282,7 @@ def create_attachments(attachment_files):
 
         if isinstance(content, str):
             # `content` is a filename - try to open the file
-            opened_file = open(content, 'rb')
+            opened_file = open(content, "rb")
             content = File(opened_file)
 
         attachment = Attachment()
@@ -251,8 +298,16 @@ def create_attachments(attachment_files):
     return attachments
 
 
-def send_mail(subject, message, from_email, recipient_list, html_message='',
-              scheduled_time=None, headers=None, priority=PRIORITY.medium):
+def send_mail(
+    subject,
+    message,
+    from_email,
+    recipient_list,
+    html_message="",
+    scheduled_time=None,
+    headers=None,
+    priority=PRIORITY.medium,
+):
     """
     Add a new message to the mail queue. This is a replacement for Django's
     ``send_mail`` core email method.
@@ -264,9 +319,15 @@ def send_mail(subject, message, from_email, recipient_list, html_message='',
     for address in recipient_list:
         emails.append(
             OutgoingEmail.objects.create(
-                from_email=from_email, to=address, subject=subject,
-                message=message, html_message=html_message, status=status,
-                headers=headers, priority=priority, scheduled_time=scheduled_time
+                from_email=from_email,
+                to=address,
+                subject=subject,
+                message=message,
+                html_message=html_message,
+                status=status,
+                headers=headers,
+                priority=priority,
+                scheduled_time=scheduled_time,
             )
         )
     if priority == PRIORITY.now:

@@ -1,0 +1,42 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% extends "mailbox/base.html" %}
+
+{% block title %}Example - Mailbox: Listings{% endblock %}
+
+{% block site_head %}Example - Mailboxes {% endblock %}
+
+{% block content %}
+
+<H2>Mailbox</H2>
+{% if mailbox_list %}
+<table border=1>
+    <tr>
+    <th class="hz">ID</th>
+    <th class="hz">Name</th>
+    <th class="hz">From Email</th>
+    <th class="hz">URI</th>
+    <th class="hz">Active</th>
+    <th class="hz">Last_polling</th>
+    <th class="hz">Action</th>
+    </tr>
+    {% for mbx in mailbox_list %}
+    <tr>
+        <td>{{ mbx.id }}</td>
+        <td>{{ mbx.name }}</td>
+        <td>{{ mbx.from_email }}</td>
+        <td width="15%"">{{ mbx.uri }}</td>
+        <td>{{ mbx.active }}</td>
+        <td>{{ mbx.last_polling }}</td>
+        <td><a href="{% url 'mailbox_auth_step1' mbx.id %}"> Authorize w/mbx</a></td>
+        <td><a href="{% url "social:begin" "google-oauth2" %}">Authorize w/Google</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+    <p>No Mailboxes are configured yet.</p>
+{% endif %}
+<!--
+    <p><a target="_blank" href="{ url 'django_mail_admin.admin' }">Create new mailbox here...</a></p>
+-->
+{% endblock %}

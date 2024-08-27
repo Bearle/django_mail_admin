@@ -1,0 +1,19 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="reference" content="{{ message_hash }}">
+    </head>
+    <body style="font-family: Arial, Helvetica, sans-serif;">
+       <p>
+        {% for bodyline in bodylines %}
+            {{bodyline}}<br>
+        {% endfor %}
+        </p>
+        <p style="font-size: 12px;"> Kindly retain the following when replying
+            <br>{{ message_hash}}
+        </p>
+        <p>---------------------------------------------------------</p>
+        <p> {{legal_disclaimer}} </p>
+    </body>
+</html>

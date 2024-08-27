@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+
+    <title>
+    {% block title %}Example.com{% endblock %}
+    </title>
+</head>
+
+<body>
+    <H1>
+    {% block site_head %}Example.com{% endblock %}
+    </H1>
+    <div class=sidebar id="sidebar">
+        {% block sidebar %}
+            <a href="/example/mailbox/">Mailbox</a>
+            | <a href="/admin/">Admin</a>
+        </ul>
+        {% endblock %}
+    </div>
+
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+    <div id="footer">
+        <div style="padding-top:100px;vertical-align:bottom;"><span style=" font-size:75%;"><hr><I>{% block footer %}© 2024, Example.com Inc. All Rights Reserved.{% endblock %}</I></span></div>
+    </div>
+</body>
+</html>
