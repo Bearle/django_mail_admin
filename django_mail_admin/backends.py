@@ -557,14 +557,39 @@ class GmailOAuth2Backend(EmailBackend):
                         new_conn_created = self.open(auth_uid=oauth_username)
 
                         if not self.connection or new_conn_created is None:
+                            # Previously this just `continue`d — silently
+                            # dropping the message instead of failing it.
+                            # open() already swallows its own exceptions
+                            # (logs + returns None) so a dead/expired OAuth
+                            # token that also fails to refresh left nothing
+                            # here to signal a problem. The caller
+                            # (django_mail_admin's OutgoingEmail.dispatch())
+                            # only marks STATUS.failed when an exception
+                            # actually propagates — with the old `continue`,
+                            # dispatch() saw a clean return from .send() and
+                            # marked the email STATUS.sent even though
+                            # nothing was ever delivered. Raising here routes
+                            # through the same per-message except block below
+                            # (raise if not fail_silently, else log+continue
+                            # to the next message) — consistent with every
+                            # other failure path in this loop, and the
+                            # underlying open()/refresh_authorization() error
+                            # is already in the logs just above.
                             logger.info(
-                                f"No connection available (skipping): "
+                                f"No connection available: "
                                 f"self.from_email={self.from_email} "
                                 f"oauth_username={oauth_username} "
                                 f"connection_exists={bool(self.connection)} "
                                 f"new_conn_created={bool(new_conn_created)} "
                             )
-                            continue
+                            raise ConnectionError(
+                                f"Unable to establish an authenticated Gmail "
+                                f"SMTP connection for oauth_username="
+                                f"{oauth_username} (from_email="
+                                f"{message.from_email}) — OAuth token invalid/"
+                                f"expired and refresh failed. See preceding "
+                                f"logs for the underlying error."
+                            )
 
                     if self._send(message):
                         num_sent += 1
