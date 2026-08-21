@@ -14,6 +14,7 @@ Contents:
    readme
    usage
    settings
+   testing_connections
    contributing
    authors
    history

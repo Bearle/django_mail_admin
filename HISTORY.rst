@@ -4,6 +4,13 @@
 
 History
 -------
+0.3.2 (2025-05-29)
+++++++++++++++++++
+
+* Added test_connection methods to Mailbox and Outbox models
+* Added test_connections management command
+* Added documentation for testing email connections
+
 0.3.1 (2022-05-05)
 ++++++++++++++++++
 

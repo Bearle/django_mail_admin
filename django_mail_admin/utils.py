@@ -3,6 +3,7 @@ import email.header
 import logging
 import os
 from collections import namedtuple
+import uuid
 
 from django.core.exceptions import ValidationError
 
@@ -82,17 +83,24 @@ def get_body_from_message(message, maintype, subtype):
 
 
 def get_attachment_save_path(instance, filename):
+    
+    # Keep original filename as display name (what users see in email)
     if hasattr(instance, 'name'):
         if not instance.name:
-            instance.name = filename  # set original filename
+            instance.name = filename
+    
+    # Get base upload path
     path = get_attachment_upload_to()
     if '%' in path:
-        path = datetime.datetime.utcnow().strftime(path)
+        path = datetime.datetime.now(datetime.UTC).strftime(path)
+    
+    # Create unique UUID subdirectory to prevent race conditions
+    unique_subdir = str(uuid.uuid4())[:8]
+    unique_path = os.path.join(path, unique_subdir)
+    
+    # Return: path/uuid_subdir/original_filename.ext
+    return os.path.join(unique_path, filename)
 
-    return os.path.join(
-        path,
-        filename,
-    )
 
 
 def parse_priority(priority):

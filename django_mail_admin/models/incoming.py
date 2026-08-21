@@ -13,84 +13,85 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from django_mail_admin.models import Mailbox, OutgoingEmail
-from django_mail_admin.settings import get_attachment_interpolation_header, get_altered_message_header
-from django_mail_admin.utils import get_body_from_message, get_attachment_save_path, \
-    convert_header_to_unicode
+from django_mail_admin.settings import (
+    get_attachment_interpolation_header,
+    get_altered_message_header,
+)
+from django_mail_admin.utils import (
+    get_body_from_message,
+    get_attachment_save_path,
+    convert_header_to_unicode,
+)
 
 
 class UnreadMessageManager(models.Manager):
     def get_queryset(self):
-        return super(UnreadMessageManager, self).get_queryset().filter(
-            read=None
-        )
+        return super(UnreadMessageManager, self).get_queryset().filter(read=None)
 
 
 class IncomingEmail(models.Model):
     mailbox = models.ForeignKey(
         Mailbox,
-        related_name='messages',
-        verbose_name=_('Mailbox'),
-        on_delete=models.CASCADE
+        related_name="messages",
+        verbose_name=_("Mailbox"),
+        on_delete=models.CASCADE,
     )
 
-    subject = models.CharField(
-        _('Subject'),
-        max_length=255
-    )
+    subject = models.CharField(_("Subject"), max_length=255)
 
-    message_id = models.CharField(
-        _('IncomingEmail ID'),
-        max_length=255
-    )
+    message_id = models.CharField(_("IncomingEmail ID"), max_length=255)
 
     in_reply_to = models.ForeignKey(
         OutgoingEmail,
-        related_name='replies',
+        related_name="replies",
         blank=True,
         null=True,
-        verbose_name=_('In reply to'),
-        on_delete=models.CASCADE
+        verbose_name=_("In reply to"),
+        on_delete=models.CASCADE,
     )
 
     from_header = models.CharField(
-        _('From header'),
+        _("From header"),
         max_length=255,
     )
 
     to_header = models.TextField(
-        _('To header'),
+        _("To header"),
     )
 
     body = models.TextField(
-        _('Body'),
+        _("Body"),
     )
 
     encoded = models.BooleanField(
-        _('Encoded'),
+        _("Encoded"),
         default=False,
-        help_text=_('True if the e-mail body is Base64 encoded'),
+        help_text=_("True if the e-mail body is Base64 encoded"),
     )
 
-    processed = models.DateTimeField(
-        _('Processed'),
-        auto_now_add=True
-    )
+    processed = models.DateTimeField(_("Processed"), auto_now_add=True)
 
     read = models.DateTimeField(
-        _('Read'),
+        _("Read"),
         default=None,
         blank=True,
         null=True,
     )
 
     eml = models.FileField(
-        _('Raw message contents'),
+        _("Raw message contents"),
         null=True,
         upload_to="messages",
-        help_text=_('Original full content of message')
+        help_text=_("Original full content of message"),
     )
     objects = models.Manager()
     unread_messages = UnreadMessageManager()
+
+    sent_datetime = models.DateTimeField(
+        _("Sent datetime"),
+        blank=True,
+        null=True,
+    )
 
     @property
     def address(self):
@@ -119,8 +120,17 @@ class IncomingEmail(models.Model):
            `to_addresses`.
 
         """
-        if self.from_header:
-            return [parseaddr(self.from_header)[1].lower()]
+
+        email_obj = self.get_email_object()
+        reply_to = email_obj.get('Reply-To')
+
+        from_address = parseaddr(self.from_header)[1].lower() if self.from_header else None
+        reply_to_address = parseaddr(reply_to)[1].lower() if reply_to else None
+
+        if reply_to_address:
+            return [reply_to_address]
+        elif from_address:
+            return [from_address]
         else:
             return []
 
@@ -128,20 +138,16 @@ class IncomingEmail(models.Model):
     def to_addresses(self):
         """Returns a list of addresses to which this message was sent."""
         addresses = []
-        for address in self.to_header.split(','):
+        for address in self.to_header.split(","):
             if address:
-                addresses.append(
-                    parseaddr(
-                        address
-                    )[1].lower()
-                )
+                addresses.append(parseaddr(address)[1].lower())
         return addresses
 
     def get_reply_headers(self, headers=None):
         headers = headers or {}
-        headers['Message-ID'] = make_msgid()
-        headers['Date'] = formatdate()
-        headers['In-Reply-To'] = self.message_id.strip()
+        headers["Message-ID"] = make_msgid()
+        headers["Date"] = formatdate()
+        headers["In-Reply-To"] = self.message_id.strip()
         return headers
 
     def reply(self, **kwargs):
@@ -154,13 +160,14 @@ class IncomingEmail(models.Model):
 
         """
         from django_mail_admin.mail import send
-        if 'sender' not in kwargs:
+
+        if "sender" not in kwargs:
             if len(self.from_address) == 0 and not self.mailbox.from_email:
-                raise ValidationError('No sender address to reply from, %s' % str(self))
+                raise ValidationError("No sender address to reply from, %s" % str(self))
             else:
-                kwargs['sender'] = self.from_address[0] or self.mailbox.from_email
-        headers = self.get_reply_headers(kwargs.get('headers'))
-        kwargs['headers'] = headers
+                kwargs["sender"] = self.from_address[0] or self.mailbox.from_email
+        headers = self.get_reply_headers(kwargs.get("headers"))
+        kwargs["headers"] = headers
         return send(**kwargs)
 
     @property
@@ -168,18 +175,22 @@ class IncomingEmail(models.Model):
         """
         Returns the message body matching content type 'text/plain'.
         """
-        return get_body_from_message(
-            self.get_email_object(), 'text', 'plain'
-        ).replace('=\n', '').strip()
+        return (
+            get_body_from_message(self.get_email_object(), "text", "plain")
+            .replace("=\n", "")
+            .strip()
+        )
 
     @property
     def html(self):
         """
         Returns the message body matching content type 'text/html'.
         """
-        return get_body_from_message(
-            self.get_email_object(), 'text', 'html'
-        ).replace('\n', '').strip()
+        return (
+            get_body_from_message(self.get_email_object(), "text", "html")
+            .replace("\n", "")
+            .strip()
+        )
 
     def _rehydrate(self, msg):
         new = EmailMessage()
@@ -188,9 +199,7 @@ class IncomingEmail(models.Model):
             for header, value in msg.items():
                 new[header] = value
             for part in msg.get_payload():
-                new.attach(
-                    self._rehydrate(part)
-                )
+                new.attach(self._rehydrate(part))
         elif get_attachment_interpolation_header() in msg.keys():
             try:
                 attachment = IncomingAttachment.objects.get(
@@ -198,43 +207,41 @@ class IncomingEmail(models.Model):
                 )
                 for header, value in attachment.items():
                     new[header] = value
-                encoding = new['Content-Transfer-Encoding']
-                if encoding and encoding.lower() == 'quoted-printable':
+                encoding = new["Content-Transfer-Encoding"]
+                document_data = ""
+                try:
+                    document_data = attachment.document.read()
+                except Exception as e:
+                    # attachment file missing!
+                    document_data = b""
+                if encoding and encoding.lower() == "quoted-printable":
                     # Cannot use `email.encoders.encode_quopri due to
                     # bug 14360: http://bugs.python.org/issue14360
                     output = BytesIO()
                     encode_quopri(
-                        BytesIO(
-                            attachment.document.read()
-                        ),
+                        BytesIO(document_data),
                         output,
                         quotetabs=True,
                         header=False,
                     )
-                    new.set_payload(
-                        output.getvalue().decode().replace(' ', '=20')
-                    )
-                    del new['Content-Transfer-Encoding']
-                    new['Content-Transfer-Encoding'] = 'quoted-printable'
+                    new.set_payload(output.getvalue().decode().replace(" ", "=20"))
+                    del new["Content-Transfer-Encoding"]
+                    new["Content-Transfer-Encoding"] = "quoted-printable"
                 else:
-                    new.set_payload(
-                        attachment.document.read()
-                    )
-                    del new['Content-Transfer-Encoding']
+                    new.set_payload(document_data)
+                    del new["Content-Transfer-Encoding"]
                     encode_base64(new)
             except IncomingAttachment.DoesNotExist:
-                new[get_altered_message_header()] = (
-                    'Missing; Attachment %s not found' % (
+                new[
+                    get_altered_message_header()
+                ] = "Missing; Attachment %s not found" % (
                     msg[get_attachment_interpolation_header()]
                 )
-                )
-                new.set_payload('')
+                new.set_payload("")
         else:
             for header, value in msg.items():
                 new[header] = value
-            new.set_payload(
-                msg.get_payload()
-            )
+            new.set_payload(msg.get_payload())
         return new
 
     def get_body(self):
@@ -245,8 +252,8 @@ class IncomingEmail(models.Model):
 
         """
         if self.encoded:
-            return base64.b64decode(self.body.encode('ascii'))
-        return self.body.encode('utf-8')
+            return base64.b64decode(self.body.encode("ascii"))
+        return self.body.encode("utf-8")
 
     def set_body(self, body):
         """Set the `body` field of this record.
@@ -256,9 +263,9 @@ class IncomingEmail(models.Model):
         no fields existed for storing arbitrary bytes.
 
         """
-        body = body.encode('utf-8')
+        body = body.encode("utf-8")
         self.encoded = True
-        self.body = base64.b64encode(body).decode('ascii')
+        self.body = base64.b64encode(body).decode("ascii")
 
     def get_email_object(self):
         """Returns an `email.message.Message` instance representing the
@@ -280,12 +287,15 @@ class IncomingEmail(models.Model):
 
         """
         if self.eml:
-            if self.eml.name.endswith('.gz'):
-                body = gzip.GzipFile(fileobj=self.eml).read()
-            else:
-                self.eml.open()
-                body = self.eml.file.read()
-                self.eml.close()
+            try:
+                if self.eml.name.endswith(".gz"):
+                    body = gzip.GzipFile(fileobj=self.eml).read()
+                else:
+                    self.eml.open()
+                    body = self.eml.file.read()
+                    self.eml.close()
+            except Exception as e:
+                body = self.get_body()
         else:
             body = self.get_body()
         flat = email.message_from_bytes(body)
@@ -299,31 +309,37 @@ class IncomingEmail(models.Model):
         return super(IncomingEmail, self).delete(*args, **kwargs)
 
     def __str__(self):
-        return self.subject + ' from ' + ','.join(self.from_address)
+        return self.subject + " from " + ",".join(self.from_address)
 
     class Meta:
-        verbose_name = _('Incoming email')
-        verbose_name_plural = _('Incoming emails')
+        verbose_name = _("Incoming email")
+        verbose_name_plural = _("Incoming emails")
+        unique_together = ["mailbox", "message_id"]
+
+    def save(self, *args, **kwargs):
+        # Clean the `subject` field
+        self.subject = self.subject.replace('\r','').replace('\n','')
+        super(IncomingEmail, self).save(*args, **kwargs)
 
 
 class IncomingAttachment(models.Model):
     message = models.ForeignKey(
         IncomingEmail,
-        related_name='attachments',
+        related_name="attachments",
         null=True,
         blank=True,
         on_delete=models.CASCADE,
-        verbose_name=_('IncomingEmail'),
+        verbose_name=_("IncomingEmail"),
     )
 
     headers = models.TextField(
-        _('Headers'),
+        _("Headers"),
         null=True,
         blank=True,
     )
 
     document = models.FileField(
-        _('Document'),
+        _("Document"),
         upload_to=get_attachment_save_path,
     )
 
@@ -368,12 +384,15 @@ class IncomingAttachment(models.Model):
     def __getitem__(self, name):
         value = self._get_rehydrated_headers()[name]
         if value is None:
-            raise KeyError('Header %s does not exist' % name)
+            raise KeyError("Header %s does not exist" % name)
         return value
 
     def __str__(self):
         return self.document.url
 
     class Meta:
-        verbose_name = _('IncomingEmail attachment')
-        verbose_name_plural = _('IncomingEmail attachments')
+        verbose_name = _("IncomingEmail attachment")
+        verbose_name_plural = _("IncomingEmail attachments")
+        indexes = [
+            models.Index(fields=["message"]),
+        ]

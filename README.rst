@@ -160,6 +160,8 @@ Optional requirements
 
 1. `django_admin_row_actions` for some useful actions in the admin interface
 2. `requests` & `social-auth-app-django` for Gmail
+3. `python-o365` for O365 emails
+4. `azure-storage-blob` Azure Blob-store token-backend for O365 auth-tokens
 
 
 FAQ

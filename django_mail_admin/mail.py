@@ -14,6 +14,7 @@ from .settings import (get_available_backends, get_batch_size,
 from .signals import email_queued
 from .utils import (parse_emails, parse_priority,
                     split_emails)
+from .models import Outbox
 
 logger = setup_loghandlers("INFO")
 
@@ -141,23 +142,26 @@ def send_many(kwargs_list):
     OutgoingEmail.objects.bulk_create(emails)
 
 
-def get_queued():
+def get_queued(outbox:Outbox|None=None):
     """
     Returns a list of emails that should be sent:
      - Status is queued
      - Has scheduled_time lower than the current time or None
     """
-    return OutgoingEmail.objects.filter(status=STATUS.queued) \
+    outgoing_emails = OutgoingEmail.objects.filter(status=STATUS.queued) \
                .select_related('template') \
-               .filter(Q(scheduled_time__lte=now()) | Q(scheduled_time=None)) \
-               .order_by(*get_sending_order()).prefetch_related('attachments')[:get_batch_size()]
+               .filter(Q(scheduled_time__lte=now()) | Q(scheduled_time=None))
+    if outbox:
+        outgoing_emails = outgoing_emails.filter(from_email__iexact=outbox.email_host_user)
+    return outgoing_emails.order_by(*get_sending_order()).prefetch_related('attachments')[:get_batch_size()]
 
-
-def send_queued(processes=1, log_level=None):
+def send_queued(outbox=None, processes=1, log_level=None):
     """
     Sends out all queued mails that has scheduled_time less than now or None
+
+    filter by outbox if provided
     """
-    queued_emails = get_queued()
+    queued_emails = get_queued(outbox=outbox)
     total_sent, total_failed = 0, 0
     total_email = len(queued_emails)
 
